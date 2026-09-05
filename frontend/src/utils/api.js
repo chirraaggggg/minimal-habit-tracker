@@ -52,3 +52,8 @@ export async function removeCompletion(habitId, date) {
     method: 'DELETE',
   });
 }
+
+// Stats
+export async function fetchHabitStats(habitId) {
+  return request(`/habits/${habitId}/stats`);
+}

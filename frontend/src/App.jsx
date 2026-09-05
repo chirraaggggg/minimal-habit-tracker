@@ -17,9 +17,9 @@ import {
   fetchCompletions,
   addCompletion,
   removeCompletion,
+  fetchHabitStats,
 } from './utils/api';
 import { getLastYearDates, groupByWeek, toLocalDateStr } from './utils/dates';
-import { computeStats } from './utils/stats';
 
 import './App.css';
 
@@ -27,6 +27,8 @@ export default function App() {
   const [habits, setHabits] = useState([]);
   const [selectedId, setSelectedId] = useState(null);
   const [completionsMap, setCompletionsMap] = useState({}); // habitId -> [YYYY-MM-DD]
+  const [statsMap, setStatsMap] = useState({}); // habitId -> { totalCompleted, currentStreak, bestStreak, completionRate }
+  const [statsLoading, setStatsLoading] = useState(false);
   const [loading, setLoading] = useState(true);
   const [habitLoading, setHabitLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -55,23 +57,25 @@ export default function App() {
     return map;
   }, [completionsMap]);
 
-  // Compute stats per habit from real YYYY-MM-DD completion dates
-  const habitsStatsMap = useMemo(() => {
-    const map = {};
-    for (const habit of habits) {
-      map[habit.id] = computeStats(completionsMap[habit.id] || []);
-    }
-    return map;
-  }, [habits, completionsMap]);
+  // Stats for the selected habit (from API)
+  const selectedStats = statsMap[selectedId] || null;
 
-  const selectedStats = useMemo(() => {
-    if (!selectedId || !habitsStatsMap[selectedId]) {
-      return { total: 0, currentStreak: 0, longestStreak: 0, completionRate: 0 };
+  // Fetch and cache stats for a given habit id
+  const refreshStats = async (id) => {
+    if (!id) return;
+    setStatsLoading(true);
+    try {
+      const data = await fetchHabitStats(id);
+      setStatsMap((prev) => ({ ...prev, [id]: data }));
+    } catch (err) {
+      // Non-fatal: stats will just be stale; don't overwrite the main error banner
+      console.error('Failed to fetch stats:', err.message);
+    } finally {
+      setStatsLoading(false);
     }
-    return habitsStatsMap[selectedId];
-  }, [selectedId, habitsStatsMap]);
+  };
 
-  // Total completions across all habits for companion progression
+  // Total completions across all habits
   const totalCompletionsAcrossAll = useMemo(() => {
     return Object.values(counts).reduce((acc, c) => acc + c, 0);
   }, [counts]);
@@ -94,6 +98,7 @@ export default function App() {
 
         const initialHabitId = habitList[0].id;
         setSelectedId(initialHabitId);
+        refreshStats(initialHabitId);
 
         const completionLists = await Promise.all(
           habitList.map((h) => fetchCompletions(h.id).catch(() => []))
@@ -125,6 +130,7 @@ export default function App() {
     if (id === selectedId) return;
     setError(null);
     setSelectedId(id);
+    refreshStats(id);
 
     const currentSeq = ++habitFetchSeqRef.current;
 
@@ -188,6 +194,8 @@ export default function App() {
         nextSet.delete(dateStr);
         return nextSet;
       });
+      // Refresh stats from backend after every toggle
+      refreshStats(habitId);
     }
   };
 
@@ -296,7 +304,7 @@ export default function App() {
                   loading={habitLoading}
                   pendingDates={pendingDates}
                 />
-                <StatsGrid stats={selectedStats} />
+                <StatsGrid stats={selectedStats} loading={statsLoading} />
               </>
             )}
           </>

@@ -1,0 +1,67 @@
+:root {
+  /* Color Palette - Soft Warm Cream & Stationery Theme */
+  --bg: #faf8f5;
+  --bg-card: #ffffff;
+  --bg-card-hover: #fdfcfb;
+  --bg-subtle: #f4f1ea;
+  --bg-subtle-hover: #eee9e0;
+  --bg-overlay: rgba(45, 49, 66, 0.35);
+
+  /* Borders & Dividers */
+  --border: #eae5dc;
+  --border-subtle: #f2eee6;
+  --border-bright: #dcd6c9;
+
+  /* Typography Colors */
+  --text: #2d3142;
+  --text-muted: #7c8594;
+  --text-faint: #a6b0be;
+
+  /* Primary Accent - Soft Pastel Green */
+  --accent: #6eb887;
+  --accent-hover: #5aa774;
+  --accent-soft: rgba(110, 184, 135, 0.12);
+  --accent-ring: rgba(110, 184, 135, 0.25);
+
+  /* Soft Pastel Accents */
+  --pastel-pink: #f4acb7;
+  --pastel-pink-soft: rgba(244, 172, 183, 0.15);
+  
+  --pastel-lavender: #bdb2ff;
+  --pastel-lavender-soft: rgba(189, 178, 255, 0.15);
+
+  --pastel-blue: #a0c4ff;
+  --pastel-blue-soft: rgba(160, 196, 255, 0.15);
+
+  --pastel-yellow: #fce38a;
+  --pastel-yellow-soft: rgba(252, 227, 138, 0.18);
+
+  --danger: #e63946;
+  --danger-soft: rgba(230, 57, 70, 0.1);
+  --danger-hover: #d62828;
+
+  /* Fonts */
+  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+  /* Soft Shadows & Elevation */
+  --shadow-soft: 0 4px 18px rgba(120, 110, 95, 0.05);
+  --shadow-hover: 0 8px 24px rgba(120, 110, 95, 0.09);
+  --shadow-card: 0 2px 10px rgba(0, 0, 0, 0.03);
+
+  /* Radii */
+  --radius-lg: 20px;
+  --radius-card: 16px;
+  --radius-sm: 10px;
+  --radius-pill: 9999px;
+
+  /* Spacing */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+
+  color-scheme: light;
+}

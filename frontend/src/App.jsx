@@ -1,122 +1,331 @@
-import { useState } from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import './App.css'
+import { useEffect, useMemo, useRef, useState } from 'react';
+import Navbar from './components/Navbar';
+import HeroSection from './components/HeroSection';
+import HabitList from './components/HabitList';
+import HabitHero from './components/HabitHero';
+import HabitGraph from './components/HabitGraph';
+import StatsGrid from './components/StatsGrid';
+import HabitModal from './components/HabitModal';
+import ConfirmModal from './components/ConfirmModal';
+import { IllustrationEmptyState } from './components/Illustrations';
 
-function App() {
-  const [count, setCount] = useState(0)
+import {
+  fetchHabits,
+  createHabit,
+  updateHabit,
+  deleteHabit,
+  fetchCompletions,
+  addCompletion,
+  removeCompletion,
+} from './utils/api';
+import { getLastYearDates, groupByWeek, toLocalDateStr } from './utils/dates';
+import { computeStats } from './utils/stats';
+
+import './App.css';
+
+export default function App() {
+  const [habits, setHabits] = useState([]);
+  const [selectedId, setSelectedId] = useState(null);
+  const [completionsMap, setCompletionsMap] = useState({}); // habitId -> [YYYY-MM-DD]
+  const [loading, setLoading] = useState(true);
+  const [habitLoading, setHabitLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [form, setForm] = useState(null); // null | { mode: 'add' } | { mode: 'edit', habit }
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [deleting, setDeleting] = useState(false);
+  const [pendingDates, setPendingDates] = useState(new Set()); // Set of YYYY-MM-DD date strings currently updating
+
+  const habitFetchSeqRef = useRef(0);
+
+  // Group last ~365 days into Sunday-aligned week columns
+  const weeks = useMemo(() => groupByWeek(getLastYearDates()), []);
+
+  const selectedHabit = habits.find((h) => h.id === selectedId) || null;
+  const selectedCompletions = useMemo(
+    () => completionsMap[selectedId] || [],
+    [completionsMap, selectedId]
+  );
+
+  // Unique completed days count per habit
+  const counts = useMemo(() => {
+    const map = {};
+    for (const [id, dates] of Object.entries(completionsMap)) {
+      map[id] = new Set(dates).size;
+    }
+    return map;
+  }, [completionsMap]);
+
+  // Compute stats per habit from real YYYY-MM-DD completion dates
+  const habitsStatsMap = useMemo(() => {
+    const map = {};
+    for (const habit of habits) {
+      map[habit.id] = computeStats(completionsMap[habit.id] || []);
+    }
+    return map;
+  }, [habits, completionsMap]);
+
+  const selectedStats = useMemo(() => {
+    if (!selectedId || !habitsStatsMap[selectedId]) {
+      return { total: 0, currentStreak: 0, longestStreak: 0, completionRate: 0 };
+    }
+    return habitsStatsMap[selectedId];
+  }, [selectedId, habitsStatsMap]);
+
+  // Total completions across all habits for companion progression
+  const totalCompletionsAcrossAll = useMemo(() => {
+    return Object.values(counts).reduce((acc, c) => acc + c, 0);
+  }, [counts]);
+
+  // Initial load: fetch habits & completions
+  useEffect(() => {
+    let cancelled = false;
+
+    async function init() {
+      try {
+        const habitList = await fetchHabits();
+        if (cancelled) return;
+        setHabits(habitList);
+
+        if (habitList.length === 0) {
+          setSelectedId(null);
+          setCompletionsMap({});
+          return;
+        }
+
+        const initialHabitId = habitList[0].id;
+        setSelectedId(initialHabitId);
+
+        const completionLists = await Promise.all(
+          habitList.map((h) => fetchCompletions(h.id).catch(() => []))
+        );
+        if (cancelled) return;
+
+        const map = {};
+        habitList.forEach((h, i) => {
+          map[h.id] = completionLists[i]
+            .map((row) => toLocalDateStr(row.completed_date))
+            .filter(Boolean);
+        });
+        setCompletionsMap(map);
+      } catch (err) {
+        if (!cancelled) setError(`Failed to load habit data: ${err.message}`);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+
+    init();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // Handle habit selection
+  const handleSelectHabit = async (id) => {
+    if (id === selectedId) return;
+    setError(null);
+    setSelectedId(id);
+
+    const currentSeq = ++habitFetchSeqRef.current;
+
+    if (!completionsMap[id]) {
+      setHabitLoading(true);
+      try {
+        const rows = await fetchCompletions(id);
+        if (currentSeq !== habitFetchSeqRef.current) return;
+        const dates = rows.map((r) => toLocalDateStr(r.completed_date)).filter(Boolean);
+        setCompletionsMap((prev) => ({ ...prev, [id]: dates }));
+      } catch (err) {
+        if (currentSeq === habitFetchSeqRef.current) {
+          setError(`Failed to fetch habit completions: ${err.message}`);
+        }
+      } finally {
+        if (currentSeq === habitFetchSeqRef.current) {
+          setHabitLoading(false);
+        }
+      }
+    }
+  };
+
+  // Toggle completion for a specific YYYY-MM-DD date
+  const handleToggleDay = async (dateStr, isCompleted) => {
+    if (!selectedId || !dateStr) return;
+    const habitId = selectedId;
+
+    if (pendingDates.has(dateStr)) return;
+
+    setPendingDates((prev) => new Set(prev).add(dateStr));
+    setError(null);
+
+    try {
+      if (isCompleted) {
+        await removeCompletion(habitId, dateStr);
+        setCompletionsMap((prevMap) => {
+          const currentDates = prevMap[habitId] || [];
+          return {
+            ...prevMap,
+            [habitId]: currentDates.filter((d) => d !== dateStr),
+          };
+        });
+      } else {
+        await addCompletion(habitId, dateStr);
+        setCompletionsMap((prevMap) => {
+          const currentDates = prevMap[habitId] || [];
+          if (currentDates.includes(dateStr)) return prevMap;
+          return {
+            ...prevMap,
+            [habitId]: [...currentDates, dateStr],
+          };
+        });
+      }
+    } catch (err) {
+      setError(
+        `Could not ${isCompleted ? 'remove' : 'add'} completion for ${dateStr}: ${err.message}`
+      );
+    } finally {
+      setPendingDates((prev) => {
+        const nextSet = new Set(prev);
+        nextSet.delete(dateStr);
+        return nextSet;
+      });
+    }
+  };
+
+  const handleCreateHabit = async (name, emoji) => {
+    const [habit] = await createHabit(name, emoji);
+    setHabits((prev) => [...prev, habit]);
+    setCompletionsMap((prev) => ({ ...prev, [habit.id]: [] }));
+    setSelectedId(habit.id);
+    setForm(null);
+  };
+
+  const handleUpdateHabit = async (id, name, emoji) => {
+    const [updated] = await updateHabit(id, name, emoji);
+    setHabits((prev) => prev.map((h) => (h.id === id ? updated : h)));
+    setForm(null);
+  };
+
+  const handleDeleteHabit = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    setError(null);
+    try {
+      await deleteHabit(deleteTarget.id);
+      const remaining = habits.filter((h) => h.id !== deleteTarget.id);
+      setHabits(remaining);
+      setCompletionsMap((prev) => {
+        const next = { ...prev };
+        delete next[deleteTarget.id];
+        return next;
+      });
+      if (selectedId === deleteTarget.id) {
+        setSelectedId(remaining.length > 0 ? remaining[0].id : null);
+      }
+      setDeleteTarget(null);
+    } catch (err) {
+      setError(`Could not delete habit: ${err.message}`);
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+    <div className="app-wrapper">
+      <div className="app-centered-container">
+        {/* Top Navbar */}
+        <Navbar onOpenAddModal={() => setForm({ mode: 'add' })} />
 
-      <div className="ticks"></div>
+        {/* Error Alert Banner */}
+        {error && (
+          <div className="retro-error-banner" role="alert">
+            <span>{error}</span>
+            <button
+              type="button"
+              className="close-banner-btn"
+              onClick={() => setError(null)}
+              aria-label="Dismiss error"
+            >
+              ✕
+            </button>
+          </div>
+        )}
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+        {/* Hero Section */}
+        <HeroSection totalCompletions={totalCompletionsAcrossAll} />
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+        {/* Main Flow Content */}
+        {loading ? (
+          <div className="loading-state-card">
+            <p>Loading your habit tracker...</p>
+          </div>
+        ) : habits.length === 0 ? (
+          <div className="empty-state-card">
+            <IllustrationEmptyState />
+            <h2 className="empty-title">Start your first habit</h2>
+            <p className="empty-text">
+              Choose something small you'd like to do consistently each day.
+            </p>
+            <button
+              type="button"
+              className="btn-accent-pill"
+              onClick={() => setForm({ mode: 'add' })}
+            >
+              + Add Habit
+            </button>
+          </div>
+        ) : (
+          <>
+            {/* Habits Grid */}
+            <HabitList
+              habits={habits}
+              selectedId={selectedId}
+              counts={counts}
+              onSelect={handleSelectHabit}
+              onEdit={(habit) => setForm({ mode: 'edit', habit })}
+              onDelete={(habit) => setDeleteTarget(habit)}
+            />
+
+            {/* Selected Habit Section */}
+            {selectedHabit && (
+              <>
+                <HabitHero habit={selectedHabit} />
+                <HabitGraph
+                  completions={selectedCompletions}
+                  weeks={weeks}
+                  onToggleDay={handleToggleDay}
+                  loading={habitLoading}
+                  pendingDates={pendingDates}
+                />
+                <StatsGrid stats={selectedStats} />
+              </>
+            )}
+          </>
+        )}
+      </div>
+
+      {/* Add / Edit Habit Modal */}
+      {form && (
+        <HabitModal
+          key={form.mode === 'edit' ? form.habit.id : 'new'}
+          initial={form.mode === 'edit' ? form.habit : null}
+          onSubmit={
+            form.mode === 'edit'
+              ? (name, emoji) => handleUpdateHabit(form.habit.id, name, emoji)
+              : handleCreateHabit
+          }
+          onCancel={() => setForm(null)}
+        />
+      )}
+
+      {/* Delete Confirmation Dialog */}
+      {deleteTarget && (
+        <ConfirmModal
+          habit={deleteTarget}
+          busy={deleting}
+          onCancel={() => setDeleteTarget(null)}
+          onConfirm={handleDeleteHabit}
+        />
+      )}
+    </div>
+  );
 }
-
-export default App

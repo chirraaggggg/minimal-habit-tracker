@@ -7,6 +7,42 @@ const port = 3000;
 
 app.use(express.json());
 
+// --- CORS Configuration ---
+const allowedOrigins = [
+  process.env.FRONTEND_URL,
+  'http://localhost:5173',
+  'http://localhost:5174',
+  'http://localhost:3000',
+  'http://127.0.0.1:5173',
+  'http://127.0.0.1:5174',
+].filter(Boolean);
+
+function isAllowedOrigin(origin) {
+  if (!origin) return true; // Allow non-browser requests (curl, Postman)
+  if (allowedOrigins.includes(origin)) return true;
+  // Match any Vercel deployment domain (*.vercel.app)
+  if (/\.vercel\.app$/.test(origin)) return true;
+  return false;
+}
+
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+
+  if (origin && isAllowedOrigin(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+  }
+
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+
+  if (req.method === 'OPTIONS') {
+    return res.status(204).end();
+  }
+
+  next();
+});
+
 
 // Test database connection
 app.get('/api/test-db', async (req, res) => {

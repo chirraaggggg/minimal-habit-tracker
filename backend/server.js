@@ -206,7 +206,7 @@ app.get('/api/habits/:id/completions', authenticateUser, async (req, res) => {
   }
 
   const result = await db.query(
-    `SELECT completed_date
+    `SELECT to_char(completed_date, 'YYYY-MM-DD') AS completed_date
      FROM habit_completions
      WHERE habit_id = $1
      ORDER BY completed_date;`,
@@ -291,6 +291,16 @@ app.get('/api/habits/:id/stats', authenticateUser, async (req, res) => {
 
   // PostgreSQL DATE values are returned as YYYY-MM-DD strings
   const dates = result.rows.map(row => row.completed_date);
+
+  // ZERO COMPLETIONS GUARD — absolute priority rule
+  if (dates.length === 0) {
+    return res.json({
+      totalCompleted: 0,
+      currentStreak: 0,
+      bestStreak: 0,
+      completionRate: 0
+    });
+  }
 
   let bestStreak = 0;
   let currentStreak = 0;

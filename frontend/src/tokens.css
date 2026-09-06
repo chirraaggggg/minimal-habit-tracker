@@ -1,57 +1,115 @@
 :root {
-  /* Color Palette - Soft Warm Cream & Stationery Theme */
-  --bg: #faf8f5;
-  --bg-card: #ffffff;
-  --bg-card-hover: #fdfcfb;
-  --bg-subtle: #f4f1ea;
-  --bg-subtle-hover: #eee9e0;
-  --bg-overlay: rgba(45, 49, 66, 0.35);
+  /* ── Light Theme (Reference "Better Me" Palette) ─────────────── */
+  --bg:             #FAF9F6;
+  --bg-card:        #ffffff;
+  --bg-card-hover:  #fcfbfa;
+  --bg-subtle:      #f4f2ec;
+  --bg-subtle-hover:#edeae2;
+  --bg-overlay:     rgba(24, 35, 59, 0.40);
 
-  /* Borders & Dividers */
-  --border: #eae5dc;
-  --border-subtle: #f2eee6;
-  --border-bright: #dcd6c9;
+  --border:         #eae6de;
+  --border-subtle:  #f3efe7;
+  --border-bright:  #ddd8cd;
 
-  /* Typography Colors */
-  --text: #2d3142;
-  --text-muted: #7c8594;
-  --text-faint: #a6b0be;
+  --text:           #18233B;
+  --text-muted:     #64748B;
+  --text-faint:     #94A3B8;
 
-  /* Primary Accent - Soft Pastel Green */
-  --accent: #6eb887;
-  --accent-hover: #5aa774;
-  --accent-soft: rgba(110, 184, 135, 0.12);
-  --accent-ring: rgba(110, 184, 135, 0.25);
+  --accent:         #4E8752;
+  --accent-hover:   #3D7041;
+  --accent-soft:    rgba(78, 135, 82, 0.12);
+  --accent-ring:    rgba(78, 135, 82, 0.25);
 
-  /* Soft Pastel Accents */
-  --pastel-pink: #f4acb7;
-  --pastel-pink-soft: rgba(244, 172, 183, 0.15);
-  
-  --pastel-lavender: #bdb2ff;
-  --pastel-lavender-soft: rgba(189, 178, 255, 0.15);
+  --sidebar-bg:     #FAF9F6;
+  --sidebar-border: #EAE6DE;
+  --nav-active-bg:  #E8F5E9;
+  --nav-active-text:#2E6B34;
 
-  --pastel-blue: #a0c4ff;
-  --pastel-blue-soft: rgba(160, 196, 255, 0.15);
+  /* Pastel palette accents */
+  --pastel-green:        #7DBA91;
+  --pastel-green-soft:   #F0FAF4;
+  --pastel-peach:        #F5A27D;
+  --pastel-peach-soft:   #FFF5EC;
+  --pastel-lavender:     #B58AD9;
+  --pastel-lavender-soft:#F5F0FF;
+  --pastel-blue:         #78A9E8;
+  --pastel-blue-soft:    #EEF4FF;
+  --pastel-pink:         #F58B96;
+  --pastel-pink-soft:    #FCE4EC;
+  --pastel-yellow:       #F3C75B;
+  --pastel-yellow-soft:  #FFF9E6;
+  --pastel-mint:         #70C8B2;
+  --pastel-mint-soft:    #E0F2F1;
 
-  --pastel-yellow: #fce38a;
-  --pastel-yellow-soft: rgba(252, 227, 138, 0.18);
+  --danger:         #E53935;
+  --danger-soft:    rgba(229, 57, 53, 0.10);
+  --danger-hover:   #C62828;
 
-  --danger: #e63946;
-  --danger-soft: rgba(230, 57, 70, 0.1);
-  --danger-hover: #d62828;
+  /* Stat card backgrounds */
+  --stat-bg-0: #F0FAF4;
+  --stat-bg-1: #FFF5EC;
+  --stat-bg-2: #F5F0FF;
+  --stat-bg-3: #EEF4FF;
+
+  /* Hero banner */
+  --hero-banner-bg: #EAF4FD;
+  --hero-banner-border: #D6E6F7;
+
+  /* Per-habit color palettes (light cell → mid cell → strong cell) */
+  --habit-0-bg:     #FCE4EC;
+  --habit-0-mid:    #F48FB1;
+  --habit-0-strong: #EC4899;
+  --habit-0-icon-bg:#FCE4EC;
+
+  --habit-1-bg:     #E3F2FD;
+  --habit-1-mid:    #90CAF9;
+  --habit-1-strong: #3B82F6;
+  --habit-1-icon-bg:#E3F2FD;
+
+  --habit-2-bg:     #E0F2F1;
+  --habit-2-mid:    #80CBC4;
+  --habit-2-strong: #14B8A6;
+  --habit-2-icon-bg:#E0F2F1;
+
+  --habit-3-bg:     #FFF9E6;
+  --habit-3-mid:    #FFE082;
+  --habit-3-strong: #F59E0B;
+  --habit-3-icon-bg:#FFF9E6;
+
+  --habit-4-bg:     #F3E5F5;
+  --habit-4-mid:    #CE93D8;
+  --habit-4-strong: #8B5CF6;
+  --habit-4-icon-bg:#F3E5F5;
+
+  --habit-5-bg:     #FBE9E7;
+  --habit-5-mid:    #FFAB91;
+  --habit-5-strong: #F97316;
+  --habit-5-icon-bg:#FBE9E7;
+
+  /* Heatmap cell visibility tokens (Light Mode) */
+  --cell-empty:        #EEF1F5;
+  --cell-empty-border: #CBD5E1;
+  --cell-empty-hover:  #D1D5DB;
+  --cell-future:       #F8FAFC;
+  --cell-future-border: #E2E8F0;
+
+  /* Dedicated mini-graph card container (Light Mode) */
+  --mini-graph-bg:     #F1F5F9;
+  --mini-graph-border: #E2E8F0;
 
   /* Fonts */
   --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 
-  /* Soft Shadows & Elevation */
-  --shadow-soft: 0 4px 18px rgba(120, 110, 95, 0.05);
-  --shadow-hover: 0 8px 24px rgba(120, 110, 95, 0.09);
-  --shadow-card: 0 2px 10px rgba(0, 0, 0, 0.03);
+  /* Shadows */
+  --shadow-soft:  0 2px 12px rgba(24, 35, 59, 0.04);
+  --shadow-hover: 0 4px 18px rgba(24, 35, 59, 0.08);
+  --shadow-card:  0 1px 4px  rgba(24, 35, 59, 0.03);
+  --shadow-sidebar: 1px 0 0 0 var(--sidebar-border);
 
   /* Radii */
-  --radius-lg: 20px;
+  --radius-lg:   20px;
   --radius-card: 16px;
-  --radius-sm: 10px;
+  --radius-sm:   10px;
   --radius-pill: 9999px;
 
   /* Spacing */
@@ -64,4 +122,99 @@
   --space-8: 32px;
 
   color-scheme: light;
+}
+
+/* ── Dark Theme ───────────────────────────────────────────────── */
+[data-theme="dark"] {
+  --bg:             #161D2B;
+  --bg-card:        #212B3D;
+  --bg-card-hover:  #283448;
+  --bg-subtle:      #2A364B;
+  --bg-subtle-hover:#32415A;
+  --bg-overlay:     rgba(0, 0, 0, 0.65);
+
+  --border:         #2E3C54;
+  --border-subtle:  #263246;
+  --border-bright:  #3E506F;
+
+  --text:           #F0F4F8;
+  --text-muted:     #94A3B8;
+  --text-faint:     #64748B;
+
+  --accent:         #5E9663;
+  --accent-hover:   #70C880;
+  --accent-soft:    rgba(94, 150, 99, 0.20);
+  --accent-ring:    rgba(94, 150, 99, 0.35);
+
+  --sidebar-bg:     #161D2B;
+  --sidebar-border: #253145;
+  --nav-active-bg:  rgba(94, 150, 99, 0.22);
+  --nav-active-text:#70C880;
+
+  --pastel-green:        #5E9663;
+  --pastel-green-soft:   #1C2D24;
+  --pastel-peach:        #D87D59;
+  --pastel-peach-soft:   #2D231E;
+  --pastel-lavender:     #9A6BBF;
+  --pastel-lavender-soft:#292036;
+  --pastel-blue:         #5789C7;
+  --pastel-blue-soft:    #1D2638;
+
+  --danger:         #EF5350;
+  --danger-soft:    rgba(239, 83, 80, 0.15);
+  --danger-hover:   #E53935;
+
+  --stat-bg-0: #1B2922;
+  --stat-bg-1: #2B221B;
+  --stat-bg-2: #251D30;
+  --stat-bg-3: #1B2433;
+
+  --hero-banner-bg:     #1B273A;
+  --hero-banner-border: #2B3D5A;
+
+  --habit-0-bg:     rgba(233, 30, 99, 0.18);
+  --habit-0-mid:    rgba(233, 30, 99, 0.50);
+  --habit-0-strong: #EC407A;
+  --habit-0-icon-bg:rgba(233, 30, 99, 0.22);
+
+  --habit-1-bg:     rgba(30, 136, 229, 0.18);
+  --habit-1-mid:    rgba(30, 136, 229, 0.50);
+  --habit-1-strong: #42A5F5;
+  --habit-1-icon-bg:rgba(30, 136, 229, 0.22);
+
+  --habit-2-bg:     rgba(0, 137, 123, 0.18);
+  --habit-2-mid:    rgba(0, 137, 123, 0.50);
+  --habit-2-strong: #26A69A;
+  --habit-2-icon-bg:rgba(0, 137, 123, 0.22);
+
+  --habit-3-bg:     rgba(245, 127, 23, 0.18);
+  --habit-3-mid:    rgba(245, 127, 23, 0.50);
+  --habit-3-strong: #FFCA28;
+  --habit-3-icon-bg:rgba(245, 127, 23, 0.22);
+
+  --habit-4-bg:     rgba(142, 36, 170, 0.18);
+  --habit-4-mid:    rgba(142, 36, 170, 0.50);
+  --habit-4-strong: #AB47BC;
+  --habit-4-icon-bg:rgba(142, 36, 170, 0.22);
+
+  --habit-5-bg:     rgba(244, 81, 30, 0.18);
+  --habit-5-mid:    rgba(244, 81, 30, 0.50);
+  --habit-5-strong: #FF7043;
+  --habit-5-icon-bg:rgba(244, 81, 30, 0.22);
+
+  --cell-empty:        #2A354A;
+  --cell-empty-border: #3B4B68;
+  --cell-empty-hover:  #384762;
+  --cell-future:       #151D2A;
+  --cell-future-border: #242F42;
+
+  --mini-graph-bg:     #1A2332;
+  --mini-graph-border: #2D3A50;
+
+  --shadow-soft:   0 2px 12px rgba(0, 0, 0, 0.30);
+  --shadow-hover:  0 4px 18px rgba(0, 0, 0, 0.45);
+  --shadow-card:   0 1px 4px  rgba(0, 0, 0, 0.25);
+  --shadow-sidebar:1px 0 0 0 var(--sidebar-border);
+
+  color-scheme: dark;
 }

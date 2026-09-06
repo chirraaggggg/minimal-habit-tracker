@@ -1,16 +1,27 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import Navbar from './components/Navbar';
-import HeroSection from './components/HeroSection';
+
+// Auth & theme
+import { useAuth } from './hooks/useAuth';
+import { useTheme } from './hooks/useTheme';
+
+// New layout components
+import Sidebar from './components/Sidebar';
+import Header from './components/Header';
+import StatCards from './components/StatCards';
+import HeroBanner from './components/HeroBanner';
 import HabitList from './components/HabitList';
-import HabitHero from './components/HabitHero';
+import TodayPanel from './components/TodayPanel';
+import ProgressCard from './components/ProgressCard';
+import BottomAnalytics from './components/BottomAnalytics';
 import HabitGraph from './components/HabitGraph';
-import StatsGrid from './components/StatsGrid';
+
+// Modals (preserved)
 import HabitModal from './components/HabitModal';
 import ConfirmModal from './components/ConfirmModal';
-import { IllustrationEmptyState } from './components/Illustrations';
 import AuthScreen from './components/AuthScreen';
-import { useAuth } from './hooks/useAuth';
+import { IllustrationEmptyState } from './components/Illustrations';
 
+// API
 import {
   fetchHabits,
   createHabit,
@@ -21,38 +32,48 @@ import {
   removeCompletion,
   fetchHabitStats,
 } from './utils/api';
-import { getLastYearDates, groupByWeek, toLocalDateStr } from './utils/dates';
+import { getLastYearDates, groupByWeek, toLocalDateStr, today } from './utils/dates';
 
 import './App.css';
 
 export default function App() {
-  const { session, authLoading, signOut } = useAuth();
+  // ── Auth ───────────────────────────────────────────────────────────────────
+  const { session, user, authLoading, signOut } = useAuth();
 
+  // ── Theme ──────────────────────────────────────────────────────────────────
+  const { theme, toggleTheme } = useTheme();
+
+  // ── Navigation (visual only — no routing needed) ───────────────────────────
+  const [activeNav, setActiveNav] = useState('home');
+
+  // ── Habit state ────────────────────────────────────────────────────────────
   const [habits, setHabits] = useState([]);
   const [selectedId, setSelectedId] = useState(null);
-  const [completionsMap, setCompletionsMap] = useState({}); // habitId -> [YYYY-MM-DD]
-  const [statsMap, setStatsMap] = useState({}); // habitId -> { totalCompleted, currentStreak, bestStreak, completionRate }
+  const [completionsMap, setCompletionsMap] = useState({});
+  const [statsMap, setStatsMap] = useState({});
   const [statsLoading, setStatsLoading] = useState(false);
   const [loading, setLoading] = useState(true);
   const [habitLoading, setHabitLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [form, setForm] = useState(null); // null | { mode: 'add' } | { mode: 'edit', habit }
+  const [form, setForm] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleting, setDeleting] = useState(false);
-  const [pendingDates, setPendingDates] = useState(new Set()); // Set of YYYY-MM-DD date strings currently updating
+  const [pendingDates, setPendingDates] = useState(new Set());
 
   const habitFetchSeqRef = useRef(0);
 
-  // Group last ~365 days into Sunday-aligned week columns
+  // ── Derived state ──────────────────────────────────────────────────────────
   const weeks = useMemo(() => groupByWeek(getLastYearDates()), []);
 
   const selectedHabit = habits.find((h) => h.id === selectedId) || null;
+  const selectedHabitIndex = habits.findIndex((h) => h.id === selectedId);
+  const selectedColorIndex = selectedHabitIndex >= 0 ? selectedHabitIndex % 6 : 0;
+
   const selectedCompletions = useMemo(
     () => completionsMap[selectedId] || [],
     [completionsMap, selectedId]
   );
 
-  // Unique completed days count per habit
   const counts = useMemo(() => {
     const map = {};
     for (const [id, dates] of Object.entries(completionsMap)) {
@@ -61,10 +82,14 @@ export default function App() {
     return map;
   }, [completionsMap]);
 
-  // Stats for the selected habit (from API)
   const selectedStats = statsMap[selectedId] || null;
 
-  // Fetch and cache stats for a given habit id
+  const totalCompletionsAcrossAll = useMemo(
+    () => Object.values(counts).reduce((acc, c) => acc + c, 0),
+    [counts]
+  );
+
+  // ── Stats helpers ──────────────────────────────────────────────────────────
   const refreshStats = async (id) => {
     if (!id) return;
     setStatsLoading(true);
@@ -72,19 +97,13 @@ export default function App() {
       const data = await fetchHabitStats(id);
       setStatsMap((prev) => ({ ...prev, [id]: data }));
     } catch (err) {
-      // Non-fatal: stats will just be stale; don't overwrite the main error banner
       console.error('Failed to fetch stats:', err.message);
     } finally {
       setStatsLoading(false);
     }
   };
 
-  // Total completions across all habits
-  const totalCompletionsAcrossAll = useMemo(() => {
-    return Object.values(counts).reduce((acc, c) => acc + c, 0);
-  }, [counts]);
-
-  // Initial load: fetch habits & completions when authenticated session is present
+  // ── Initial data load ──────────────────────────────────────────────────────
   useEffect(() => {
     if (!session) return;
     let cancelled = false;
@@ -93,32 +112,57 @@ export default function App() {
       setLoading(true);
       setError(null);
       try {
-        const habitList = await fetchHabits();
+        const fetchedList = await fetchHabits();
         if (cancelled) return;
-        setHabits(habitList);
+        let list = fetchedList;
+        if (list.length === 0) {
+          const defaults = [
+            { name: 'Gym', emoji: 'Gym' },
+            { name: 'Reading', emoji: 'Reading' },
+            { name: 'Coding', emoji: 'Coding' },
+            { name: 'Meditate', emoji: 'Meditate' },
+            { name: 'Drink Water', emoji: 'Drink Water' },
+            { name: 'No Social Media', emoji: 'No Social Media' },
+          ];
+          const created = [];
+          for (const d of defaults) {
+            try {
+              const [h] = await createHabit(d.name, d.emoji);
+              if (h) created.push(h);
+            } catch (e) {
+              console.error('Error creating default habit:', e);
+            }
+          }
+          if (created.length > 0) list = created;
+        }
 
-        if (habitList.length === 0) {
+        setHabits(list);
+
+        if (list.length === 0) {
           setSelectedId(null);
           setCompletionsMap({});
           return;
         }
 
-        const initialHabitId = habitList[0].id;
-        setSelectedId(initialHabitId);
-        refreshStats(initialHabitId);
+        const initialId = list[0].id;
+        setSelectedId(initialId);
 
-        const completionLists = await Promise.all(
-          habitList.map((h) => fetchCompletions(h.id).catch(() => []))
-        );
+        const [completionLists, statsLists] = await Promise.all([
+          Promise.all(list.map((h) => fetchCompletions(h.id).catch(() => []))),
+          Promise.all(list.map((h) => fetchHabitStats(h.id).catch(() => null))),
+        ]);
         if (cancelled) return;
 
-        const map = {};
-        habitList.forEach((h, i) => {
-          map[h.id] = completionLists[i]
-            .map((row) => toLocalDateStr(row.completed_date))
+        const cMap = {};
+        const sMap = {};
+        list.forEach((h, i) => {
+          cMap[h.id] = (completionLists[i] || [])
+            .map((row) => toLocalDateStr(row))
             .filter(Boolean);
+          sMap[h.id] = statsLists[i] || { totalCompleted: 0, currentStreak: 0, bestStreak: 0, completionRate: 0 };
         });
-        setCompletionsMap(map);
+        setCompletionsMap(cMap);
+        setStatsMap(sMap);
       } catch (err) {
         if (!cancelled) setError(`Failed to load habit data: ${err.message}`);
       } finally {
@@ -127,12 +171,10 @@ export default function App() {
     }
 
     init();
-    return () => {
-      cancelled = true;
-    };
+    return () => { cancelled = true; };
   }, [session]);
 
-  // Handle habit selection
+  // ── Habit selection ────────────────────────────────────────────────────────
   const handleSelectHabit = async (id) => {
     if (id === selectedId) return;
     setError(null);
@@ -140,76 +182,79 @@ export default function App() {
     refreshStats(id);
 
     const currentSeq = ++habitFetchSeqRef.current;
-
     if (!completionsMap[id]) {
       setHabitLoading(true);
       try {
         const rows = await fetchCompletions(id);
         if (currentSeq !== habitFetchSeqRef.current) return;
-        const dates = rows.map((r) => toLocalDateStr(r.completed_date)).filter(Boolean);
+        const dates = rows.map((r) => toLocalDateStr(r)).filter(Boolean);
         setCompletionsMap((prev) => ({ ...prev, [id]: dates }));
       } catch (err) {
         if (currentSeq === habitFetchSeqRef.current) {
           setError(`Failed to fetch habit completions: ${err.message}`);
         }
       } finally {
-        if (currentSeq === habitFetchSeqRef.current) {
-          setHabitLoading(false);
-        }
+        if (currentSeq === habitFetchSeqRef.current) setHabitLoading(false);
       }
     }
   };
 
-  // Toggle completion for a specific YYYY-MM-DD date
-  const handleToggleDay = async (dateStr, isCompleted) => {
-    if (!selectedId || !dateStr) return;
-    const habitId = selectedId;
+  // ── Unified Toggle Cell Completion ───────────────────────────────────────────
+  const handleToggleCell = async (habitId, dateStr, isCompleted) => {
+    if (!habitId || !dateStr) return;
+    const pendingKey = `${dateStr}-${habitId}`;
+    if (pendingDates.has(pendingKey) || pendingDates.has(dateStr)) return;
 
-    if (pendingDates.has(dateStr)) return;
-
-    setPendingDates((prev) => new Set(prev).add(dateStr));
+    setPendingDates((prev) => new Set(prev).add(pendingKey));
     setError(null);
 
     try {
       if (isCompleted) {
         await removeCompletion(habitId, dateStr);
-        setCompletionsMap((prevMap) => {
-          const currentDates = prevMap[habitId] || [];
-          return {
-            ...prevMap,
-            [habitId]: currentDates.filter((d) => d !== dateStr),
-          };
-        });
+        setCompletionsMap((prevMap) => ({
+          ...prevMap,
+          [habitId]: (prevMap[habitId] || []).filter((d) => d !== dateStr),
+        }));
       } else {
         await addCompletion(habitId, dateStr);
         setCompletionsMap((prevMap) => {
-          const currentDates = prevMap[habitId] || [];
-          if (currentDates.includes(dateStr)) return prevMap;
-          return {
-            ...prevMap,
-            [habitId]: [...currentDates, dateStr],
-          };
+          const current = prevMap[habitId] || [];
+          if (current.includes(dateStr)) return prevMap;
+          return { ...prevMap, [habitId]: [...current, dateStr] };
         });
       }
+      refreshStats(habitId);
     } catch (err) {
-      setError(
-        `Could not ${isCompleted ? 'remove' : 'add'} completion for ${dateStr}: ${err.message}`
-      );
+      console.error('Failed to toggle completion:', err);
+      setError("Couldn't update this day. Please try again.");
     } finally {
       setPendingDates((prev) => {
-        const nextSet = new Set(prev);
-        nextSet.delete(dateStr);
-        return nextSet;
+        const next = new Set(prev);
+        next.delete(pendingKey);
+        next.delete(dateStr);
+        return next;
       });
-      // Refresh stats from backend after every toggle
-      refreshStats(habitId);
     }
   };
 
+  // ── Legacy alias handlers ──────────────────────────────────────────────────
+  const handleToggleDay = (dateStr, isCompleted) => {
+    if (selectedId) handleToggleCell(selectedId, dateStr, isCompleted);
+  };
+
+  const handleToggleToday = (habitId, dateStr, isCompleted) => {
+    handleToggleCell(habitId, dateStr, isCompleted);
+  };
+
+  // ── CRUD ───────────────────────────────────────────────────────────────────
   const handleCreateHabit = async (name, emoji) => {
     const [habit] = await createHabit(name, emoji);
     setHabits((prev) => [...prev, habit]);
     setCompletionsMap((prev) => ({ ...prev, [habit.id]: [] }));
+    setStatsMap((prev) => ({
+      ...prev,
+      [habit.id]: { totalCompleted: 0, currentStreak: 0, bestStreak: 0, completionRate: 0 },
+    }));
     setSelectedId(habit.id);
     setForm(null);
   };
@@ -233,6 +278,11 @@ export default function App() {
         delete next[deleteTarget.id];
         return next;
       });
+      setStatsMap((prev) => {
+        const next = { ...prev };
+        delete next[deleteTarget.id];
+        return next;
+      });
       if (selectedId === deleteTarget.id) {
         setSelectedId(remaining.length > 0 ? remaining[0].id : null);
       }
@@ -244,8 +294,7 @@ export default function App() {
     }
   };
 
-  // While we're checking the initial session, show a minimal loading screen
-  // so we never flash the wrong UI (AuthScreen or tracker) on refresh.
+  // ── Auth gates ─────────────────────────────────────────────────────────────
   if (authLoading) {
     return (
       <div className="auth-init-loader">
@@ -254,19 +303,28 @@ export default function App() {
     );
   }
 
-  // Not authenticated — show the auth screen
   if (!session) {
     return <AuthScreen />;
   }
 
-  // Authenticated — show the full habit tracker
+  // ── Main app ───────────────────────────────────────────────────────────────
   return (
-    <div className="app-wrapper">
-      <div className="app-centered-container">
-        {/* Top Navbar */}
-        <Navbar onOpenAddModal={() => setForm({ mode: 'add' })} onSignOut={signOut} />
+    <div className="app-shell">
+      {/* Sidebar */}
+      <Sidebar activeNav={activeNav} onNavChange={setActiveNav} />
 
-        {/* Error Alert Banner */}
+      {/* Main content */}
+      <main className="main-content" id="main-content">
+        {/* Header */}
+        <Header
+          user={user}
+          theme={theme}
+          onToggleTheme={toggleTheme}
+          onSignOut={signOut}
+          onAddHabit={() => setForm({ mode: 'add' })}
+        />
+
+        {/* Error banner */}
         {error && (
           <div className="retro-error-banner" role="alert">
             <span>{error}</span>
@@ -281,58 +339,48 @@ export default function App() {
           </div>
         )}
 
-        {/* Hero Section */}
-        <HeroSection totalCompletions={totalCompletionsAcrossAll} />
-
-        {/* Main Flow Content */}
+        {/* Loading state */}
         {loading ? (
           <div className="loading-state-card">
-            <p>Loading your habit tracker...</p>
-          </div>
-        ) : habits.length === 0 ? (
-          <div className="empty-state-card">
-            <IllustrationEmptyState />
-            <h2 className="empty-title">Start your first habit</h2>
-            <p className="empty-text">
-              Choose something small you'd like to do consistently each day.
-            </p>
-            <button
-              type="button"
-              className="btn-accent-pill"
-              onClick={() => setForm({ mode: 'add' })}
-            >
-              + Add Habit
-            </button>
+            <div className="auth-init-spinner" aria-label="Loading habits" />
+            <p>Loading your habits...</p>
           </div>
         ) : (
           <>
-            {/* Habits Grid */}
-            <HabitList
-              habits={habits}
-              selectedId={selectedId}
-              counts={counts}
-              onSelect={handleSelectHabit}
-              onEdit={(habit) => setForm({ mode: 'edit', habit })}
-              onDelete={(habit) => setDeleteTarget(habit)}
-            />
+            {/* Two-column: My Habits + Today panel */}
+            <div className="habits-today-grid">
+              {/* Left: habit list */}
+              <HabitList
+                habits={habits}
+                selectedId={selectedId}
+                counts={counts}
+                completionsMap={completionsMap}
+                statsMap={statsMap}
+                onSelect={handleSelectHabit}
+                onEdit={(habit) => setForm({ mode: 'edit', habit })}
+                onDelete={(habit) => setDeleteTarget(habit)}
+                onAdd={() => setForm({ mode: 'add' })}
+                onToggleCell={handleToggleCell}
+                pendingDates={pendingDates}
+              />
 
-            {/* Selected Habit Section */}
-            {selectedHabit && (
-              <>
-                <HabitHero habit={selectedHabit} />
-                <HabitGraph
-                  completions={selectedCompletions}
-                  weeks={weeks}
-                  onToggleDay={handleToggleDay}
-                  loading={habitLoading}
+              {/* Right: Today panel + progress card */}
+              <div className="right-column">
+                <TodayPanel
+                  habits={habits}
+                  completionsMap={completionsMap}
                   pendingDates={pendingDates}
+                  onToggleToday={handleToggleToday}
                 />
-                <StatsGrid stats={selectedStats} loading={statsLoading} />
-              </>
-            )}
+                <ProgressCard />
+              </div>
+            </div>
+
+            {/* Bottom analytics */}
+            <BottomAnalytics stats={selectedStats} loading={statsLoading} />
           </>
         )}
-      </div>
+      </main>
 
       {/* Add / Edit Habit Modal */}
       {form && (
@@ -348,7 +396,7 @@ export default function App() {
         />
       )}
 
-      {/* Delete Confirmation Dialog */}
+      {/* Delete Confirmation */}
       {deleteTarget && (
         <ConfirmModal
           habit={deleteTarget}

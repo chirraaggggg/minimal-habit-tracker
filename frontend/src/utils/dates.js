@@ -26,6 +26,9 @@ export function parseDate(str) {
  */
 export function toLocalDateStr(value) {
   if (!value) return '';
+  if (typeof value === 'object' && value !== null && !(value instanceof Date)) {
+    value = value.completed_date || value.completedDate || value.date || value;
+  }
   if (typeof value === 'string') {
     const match = value.match(/^(\d{4}-\d{2}-\d{2})/);
     if (match) return match[1];
@@ -55,24 +58,23 @@ export function formatDisplayDate(dateStr) {
   return `${monthStr} ${dayStr}, ${yearStr}`;
 }
 
-/**
- * Generate a 365-day Monday-first calendar grid.
- * Exactly 365 dates ending on TODAY (today - 364 through today).
- * Monday-first: Row 0=MON, Row 1=TUE, Row 2=WED, Row 3=THU, Row 4=FRI, Row 5=SAT, Row 6=SUN.
- */
-export function get365DayCalendarGrid() {
-  const now = new Date();
-  const endDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12, 0, 0);
+const MONTH_NAMES = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
 
-  const startDate = new Date(endDate);
-  startDate.setDate(startDate.getDate() - 364);
+/**
+ * Generate a complete calendar year grid (Jan 1 to Dec 31 of targetYear).
+ * Monday-first: Row 0=MON, Row 1=TUE, Row 2=WED, Row 3=THU, Row 4=FRI, Row 5=SAT, Row 6=SUN.
+ * Returns weeks (array of 7-cell arrays), monthLabels (all 12 months with colIndex), and totalDays.
+ */
+export function getCalendarYearGrid(targetYear = new Date().getFullYear()) {
+  const startDate = new Date(targetYear, 0, 1, 12, 0, 0);
+  const endDate = new Date(targetYear, 11, 31, 12, 0, 0);
+  const todayStr = today();
 
   const dates = [];
   const curr = new Date(startDate);
 
   while (curr <= endDate) {
     const dateStr = formatDate(curr);
-    // Monday-first weekday index (0 = Mon, 5 = Sat, 6 = Sun)
     const dayOfWeek = (curr.getDay() + 6) % 7;
     const month = curr.getMonth();
     const year = curr.getFullYear();
@@ -83,6 +85,8 @@ export function get365DayCalendarGrid() {
       month,
       year,
       isBlank: false,
+      isFuture: dateStr > todayStr,
+      isToday: dateStr === todayStr,
     });
 
     curr.setDate(curr.getDate() + 1);
@@ -92,7 +96,7 @@ export function get365DayCalendarGrid() {
   const weeks = [];
   let currentWeek = [];
 
-  // Pad first week with leading blank cells if start date is not Monday
+  // Pad first week with leading blank cells if start date (Jan 1) is not Monday
   const firstDayOfWeek = dates[0].dayOfWeek;
   for (let i = 0; i < firstDayOfWeek; i++) {
     currentWeek.push({ isBlank: true, dayOfWeek: i });
@@ -106,7 +110,7 @@ export function get365DayCalendarGrid() {
     }
   });
 
-  // Pad last week with trailing blank cells if last week is incomplete
+  // Pad last week with trailing blank cells if last week (Dec 31) is incomplete
   if (currentWeek.length > 0) {
     while (currentWeek.length < 7) {
       currentWeek.push({ isBlank: true, dayOfWeek: currentWeek.length });
@@ -114,29 +118,26 @@ export function get365DayCalendarGrid() {
     weeks.push(currentWeek);
   }
 
-  // Extract Month Header positions (colIndex -> Month Label)
+  // Extract Month Header positions (colIndex -> Month Label) for all 12 months
   const monthLabels = [];
-  let lastMonth = -1;
-  let lastColIndex = -3;
-
-  weeks.forEach((week, colIndex) => {
-    const firstRealCell = week.find((c) => !c.isBlank);
-    if (firstRealCell) {
-      const month = firstRealCell.month;
-      if (month !== lastMonth && colIndex - lastColIndex >= 2) {
-        const dateObj = parseDate(firstRealCell.date);
-        const label = dateObj.toLocaleString('en-US', { month: 'short' }).toUpperCase();
-        monthLabels.push({
-          colIndex,
-          label,
-        });
-        lastMonth = month;
-        lastColIndex = colIndex;
-      }
+  for (let m = 0; m < 12; m++) {
+    const colIndex = weeks.findIndex((w) => w.some((cell) => !cell.isBlank && cell.month === m));
+    if (colIndex !== -1) {
+      monthLabels.push({
+        colIndex,
+        label: MONTH_NAMES[m],
+      });
     }
-  });
+  }
 
-  return { weeks, monthLabels, totalDays: dates.length };
+  return { weeks, monthLabels, totalDays: dates.length, year: targetYear };
+}
+
+/**
+ * Backward compatibility wrapper. Returns the complete calendar year grid.
+ */
+export function get365DayCalendarGrid() {
+  return getCalendarYearGrid();
 }
 
 /**

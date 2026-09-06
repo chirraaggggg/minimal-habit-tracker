@@ -377,28 +377,27 @@ app.get('/api/habits/:id/stats', authenticateUser, async (req, res) => {
   // Calculate current streak
   if (dates.length > 0) {
     const now = new Date();
+    const serverTodayStr = `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, '0')}-${String(now.getUTCDate()).padStart(2, '0')}`;
+    const latestDateStr = dates[dates.length - 1];
 
-    const todayString =
-      `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    // Reference today is max(serverTodayStr, latestDateStr) to handle client timezone differences
+    const referenceToday = latestDateStr > serverTodayStr ? latestDateStr : serverTodayStr;
 
-    const today = dateToUTC(todayString);
-    const latestDate = dateToUTC(dates[dates.length - 1]);
+    function daysBetween(d1, d2) {
+      const ms1 = dateToUTC(d1);
+      const ms2 = dateToUTC(d2);
+      return Math.round((ms2 - ms1) / (1000 * 60 * 60 * 24));
+    }
 
-    const daysFromToday =
-      (today - latestDate) / (1000 * 60 * 60 * 24);
+    const gapFromToday = daysBetween(latestDateStr, referenceToday);
 
-    // Current streak must include today or yesterday
-    if (daysFromToday === 0 || daysFromToday === 1) {
+    // Current streak is active if the latest completion is today (gap === 0) or yesterday (gap === 1)
+    if (gapFromToday === 0 || gapFromToday === 1) {
       currentStreak = 1;
 
       for (let i = dates.length - 1; i > 0; i--) {
-        const current = dateToUTC(dates[i]);
-        const previous = dateToUTC(dates[i - 1]);
-
-        const difference =
-          (current - previous) / (1000 * 60 * 60 * 24);
-
-        if (difference === 1) {
+        const diff = daysBetween(dates[i - 1], dates[i]);
+        if (diff === 1) {
           currentStreak++;
         } else {
           break;

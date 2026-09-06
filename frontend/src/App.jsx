@@ -8,6 +8,8 @@ import StatsGrid from './components/StatsGrid';
 import HabitModal from './components/HabitModal';
 import ConfirmModal from './components/ConfirmModal';
 import { IllustrationEmptyState } from './components/Illustrations';
+import AuthScreen from './components/AuthScreen';
+import { useAuth } from './hooks/useAuth';
 
 import {
   fetchHabits,
@@ -24,6 +26,8 @@ import { getLastYearDates, groupByWeek, toLocalDateStr } from './utils/dates';
 import './App.css';
 
 export default function App() {
+  const { session, authLoading, signOut } = useAuth();
+
   const [habits, setHabits] = useState([]);
   const [selectedId, setSelectedId] = useState(null);
   const [completionsMap, setCompletionsMap] = useState({}); // habitId -> [YYYY-MM-DD]
@@ -80,11 +84,14 @@ export default function App() {
     return Object.values(counts).reduce((acc, c) => acc + c, 0);
   }, [counts]);
 
-  // Initial load: fetch habits & completions
+  // Initial load: fetch habits & completions when authenticated session is present
   useEffect(() => {
+    if (!session) return;
     let cancelled = false;
 
     async function init() {
+      setLoading(true);
+      setError(null);
       try {
         const habitList = await fetchHabits();
         if (cancelled) return;
@@ -123,7 +130,7 @@ export default function App() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [session]);
 
   // Handle habit selection
   const handleSelectHabit = async (id) => {
@@ -237,11 +244,27 @@ export default function App() {
     }
   };
 
+  // While we're checking the initial session, show a minimal loading screen
+  // so we never flash the wrong UI (AuthScreen or tracker) on refresh.
+  if (authLoading) {
+    return (
+      <div className="auth-init-loader">
+        <div className="auth-init-spinner" aria-label="Loading" />
+      </div>
+    );
+  }
+
+  // Not authenticated — show the auth screen
+  if (!session) {
+    return <AuthScreen />;
+  }
+
+  // Authenticated — show the full habit tracker
   return (
     <div className="app-wrapper">
       <div className="app-centered-container">
         {/* Top Navbar */}
-        <Navbar onOpenAddModal={() => setForm({ mode: 'add' })} />
+        <Navbar onOpenAddModal={() => setForm({ mode: 'add' })} onSignOut={signOut} />
 
         {/* Error Alert Banner */}
         {error && (

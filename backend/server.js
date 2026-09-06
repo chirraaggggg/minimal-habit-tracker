@@ -1,5 +1,6 @@
 const express = require('express');
 const db = require('./db');
+const authenticateUser = require('./authMiddleware');
 
 const app = express();
 const port = 3000;
@@ -15,18 +16,22 @@ app.get('/api/test-db', async (req, res) => {
 });
 
 
-// Get all habits
-app.get('/api/habits', async (req, res) => {
+// Get all habits for the authenticated user
+app.get('/api/habits', authenticateUser, async (req, res) => {
   const result = await db.query(
-    'SELECT * FROM habits ORDER BY id;'
+    `SELECT *
+     FROM habits
+     WHERE user_id = $1
+     ORDER BY id;`,
+    [req.user.id]
   );
 
   res.json(result.rows);
 });
 
 
-// Create a habit
-app.post('/api/habits', async (req, res) => {
+// Create a habit for the authenticated user
+app.post('/api/habits', authenticateUser, async (req, res) => {
   const { name, emoji } = req.body;
 
   // Validate name
@@ -44,18 +49,18 @@ app.post('/api/habits', async (req, res) => {
   }
 
   const result = await db.query(
-    `INSERT INTO habits (name, emoji)
-     VALUES ($1, $2)
+    `INSERT INTO habits (name, emoji, user_id)
+     VALUES ($1, $2, $3)
      RETURNING *;`,
-    [name.trim(), emoji.trim()]
+    [name.trim(), emoji.trim(), req.user.id]
   );
 
   res.status(201).json(result.rows);
 });
 
 
-// Update a habit
-app.patch('/api/habits/:id', async (req, res) => {
+// Update a habit belonging to the authenticated user
+app.patch('/api/habits/:id', authenticateUser, async (req, res) => {
   const { name, emoji } = req.body;
 
   // Validate name
@@ -76,8 +81,14 @@ app.patch('/api/habits/:id', async (req, res) => {
     `UPDATE habits
      SET name = $1, emoji = $2
      WHERE id = $3
+     AND user_id = $4
      RETURNING *;`,
-    [name.trim(), emoji.trim(), req.params.id]
+    [
+      name.trim(),
+      emoji.trim(),
+      req.params.id,
+      req.user.id
+    ]
   );
 
   if (result.rows.length === 0) {
@@ -90,13 +101,17 @@ app.patch('/api/habits/:id', async (req, res) => {
 });
 
 
-// Delete a habit
-app.delete('/api/habits/:id', async (req, res) => {
+// Delete a habit belonging to the authenticated user
+app.delete('/api/habits/:id', authenticateUser, async (req, res) => {
   const result = await db.query(
     `DELETE FROM habits
      WHERE id = $1
+     AND user_id = $2
      RETURNING *;`,
-    [req.params.id]
+    [
+      req.params.id,
+      req.user.id
+    ]
   );
 
   if (result.rows.length === 0) {
@@ -110,7 +125,7 @@ app.delete('/api/habits/:id', async (req, res) => {
 
 
 // Mark a habit as completed
-app.post('/api/habits/:id/completions', async (req, res) => {
+app.post('/api/habits/:id/completions', authenticateUser, async (req, res) => {
   const { date } = req.body;
 
   // Validate date exists
@@ -129,12 +144,16 @@ app.post('/api/habits/:id/completions', async (req, res) => {
     });
   }
 
-  // Check if habit exists
+  // Check that habit belongs to authenticated user
   const habit = await db.query(
     `SELECT id
      FROM habits
-     WHERE id = $1;`,
-    [req.params.id]
+     WHERE id = $1
+     AND user_id = $2;`,
+    [
+      req.params.id,
+      req.user.id
+    ]
   );
 
   if (habit.rows.length === 0) {
@@ -167,13 +186,17 @@ app.post('/api/habits/:id/completions', async (req, res) => {
 
 
 // Get all completion dates for a habit
-app.get('/api/habits/:id/completions', async (req, res) => {
-  // Check if habit exists
+app.get('/api/habits/:id/completions', authenticateUser, async (req, res) => {
+  // Check that habit belongs to authenticated user
   const habit = await db.query(
     `SELECT id
      FROM habits
-     WHERE id = $1;`,
-    [req.params.id]
+     WHERE id = $1
+     AND user_id = $2;`,
+    [
+      req.params.id,
+      req.user.id
+    ]
   );
 
   if (habit.rows.length === 0) {
@@ -195,13 +218,34 @@ app.get('/api/habits/:id/completions', async (req, res) => {
 
 
 // Remove a completion
-app.delete('/api/habits/:id/completions/:date', async (req, res) => {
+app.delete('/api/habits/:id/completions/:date', authenticateUser, async (req, res) => {
+  // Check that habit belongs to authenticated user
+  const habit = await db.query(
+    `SELECT id
+     FROM habits
+     WHERE id = $1
+     AND user_id = $2;`,
+    [
+      req.params.id,
+      req.user.id
+    ]
+  );
+
+  if (habit.rows.length === 0) {
+    return res.status(404).json({
+      error: 'Habit not found'
+    });
+  }
+
   const result = await db.query(
     `DELETE FROM habit_completions
      WHERE habit_id = $1
      AND completed_date = $2
      RETURNING *;`,
-    [req.params.id, req.params.date]
+    [
+      req.params.id,
+      req.params.date
+    ]
   );
 
   if (result.rows.length === 0) {
@@ -215,13 +259,17 @@ app.delete('/api/habits/:id/completions/:date', async (req, res) => {
 
 
 // Get habit statistics
-app.get('/api/habits/:id/stats', async (req, res) => {
-  // Get habit creation date
+app.get('/api/habits/:id/stats', authenticateUser, async (req, res) => {
+  // Get habit creation date and verify ownership
   const habit = await db.query(
     `SELECT created_at
      FROM habits
-     WHERE id = $1;`,
-    [req.params.id]
+     WHERE id = $1
+     AND user_id = $2;`,
+    [
+      req.params.id,
+      req.user.id
+    ]
   );
 
   if (habit.rows.length === 0) {
@@ -241,9 +289,8 @@ app.get('/api/habits/:id/stats', async (req, res) => {
     [req.params.id]
   );
 
-  const dates = result.rows.map(row => {
-    return row.completed_date.toISOString().split('T')[0];
-  });
+  // PostgreSQL DATE values are returned as YYYY-MM-DD strings
+  const dates = result.rows.map(row => row.completed_date);
 
   let bestStreak = 0;
   let currentStreak = 0;

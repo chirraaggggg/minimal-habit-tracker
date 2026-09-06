@@ -104,8 +104,18 @@ export default function App() {
   };
 
   // ── Initial data load ──────────────────────────────────────────────────────
+  const accessToken = session?.access_token;
+
   useEffect(() => {
-    if (!session) return;
+    if (!accessToken) {
+      setLoading(false);
+      setHabits([]);
+      setSelectedId(null);
+      setCompletionsMap({});
+      setStatsMap({});
+      return;
+    }
+
     let cancelled = false;
 
     async function init() {
@@ -145,15 +155,16 @@ export default function App() {
         setCompletionsMap(cMap);
         setStatsMap(sMap);
       } catch (err) {
-        if (!cancelled) setError(`Failed to load habit data: ${err.message}`);
+        console.error('Error fetching habits data:', err);
+        if (!cancelled) setError(`Failed to load habit data: ${err.message || 'Network error'}`);
       } finally {
-        if (!cancelled) setLoading(false);
+        setLoading(false);
       }
     }
 
     init();
     return () => { cancelled = true; };
-  }, [session]);
+  }, [accessToken]);
 
   // ── Habit selection ────────────────────────────────────────────────────────
   const handleSelectHabit = async (id) => {

@@ -114,33 +114,14 @@ export default function App() {
       try {
         const fetchedList = await fetchHabits();
         if (cancelled) return;
-        let list = fetchedList;
-        if (list.length === 0) {
-          const defaults = [
-            { name: 'Gym', emoji: 'Gym' },
-            { name: 'Reading', emoji: 'Reading' },
-            { name: 'Coding', emoji: 'Coding' },
-            { name: 'Meditate', emoji: 'Meditate' },
-            { name: 'Drink Water', emoji: 'Drink Water' },
-            { name: 'No Social Media', emoji: 'No Social Media' },
-          ];
-          const created = [];
-          for (const d of defaults) {
-            try {
-              const [h] = await createHabit(d.name, d.emoji);
-              if (h) created.push(h);
-            } catch (e) {
-              console.error('Error creating default habit:', e);
-            }
-          }
-          if (created.length > 0) list = created;
-        }
+        const list = Array.isArray(fetchedList) ? fetchedList : [];
 
         setHabits(list);
 
         if (list.length === 0) {
           setSelectedId(null);
           setCompletionsMap({});
+          setStatsMap({});
           return;
         }
 

@@ -1,6 +1,18 @@
 import { supabase } from './supabase';
 
-const API_BASE = '/api';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+
+function getFullUrl(url) {
+  const base = API_URL.replace(/\/+$/, '');
+  const path = url.startsWith('/') ? url : `/${url}`;
+  if (base.endsWith('/api') && path.startsWith('/api')) {
+    return `${base}${path.slice(4)}`;
+  }
+  if (!base.endsWith('/api') && !path.startsWith('/api')) {
+    return `${base}/api${path}`;
+  }
+  return `${base}${path}`;
+}
 
 /**
  * Reusable request helper that automatically attaches the current Supabase session's access token
@@ -26,7 +38,9 @@ async function request(url, options = {}) {
     ...options.headers,
   };
 
-  const res = await fetch(`${API_BASE}${url}`, {
+  const fullUrl = getFullUrl(url);
+
+  const res = await fetch(fullUrl, {
     ...options,
     headers,
   });

@@ -28,7 +28,7 @@ export default function BottomAnalytics({ stats, loading }) {
                 transform="rotate(-90 22 22)"
               />
             </svg>
-            <span className="analytics-ring-text">{loading ? '—' : `${completionRate}%`}</span>
+            <span className="analytics-ring-text tabular-nums">{loading ? '—' : `${completionRate}%`}</span>
           </div>
 
           <div className="analytics-card-details">

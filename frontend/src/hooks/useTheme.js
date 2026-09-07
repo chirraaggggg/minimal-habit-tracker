@@ -9,19 +9,19 @@ const STORAGE_KEY = 'ls-theme';
 export function useTheme() {
   const [theme, setTheme] = useState(() => {
     try {
-      return localStorage.getItem(STORAGE_KEY) || 'light';
+      // Default to 'dark' — :root in tokens.css is dark
+      return localStorage.getItem(STORAGE_KEY) || 'dark';
     } catch {
-      return 'light';
+      return 'dark';
     }
   });
 
   useEffect(() => {
     const root = document.documentElement;
-    if (theme === 'dark') {
-      root.setAttribute('data-theme', 'dark');
-    } else {
-      root.removeAttribute('data-theme');
-    }
+    // Always SET the attribute — never remove it.
+    // tokens.css uses [data-theme="light"] and [data-theme="dark"] selectors.
+    // Removing the attribute means [data-theme="light"] never matches.
+    root.setAttribute('data-theme', theme);
     try {
       localStorage.setItem(STORAGE_KEY, theme);
     } catch {

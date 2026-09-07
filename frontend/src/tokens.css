@@ -1,116 +1,81 @@
 :root {
-  /* ── Light Theme (Reference "Better Me" Palette) ─────────────── */
-  --bg:             #FAF9F6;
-  --bg-card:        #ffffff;
-  --bg-card-hover:  #fcfbfa;
-  --bg-subtle:      #f4f2ec;
-  --bg-subtle-hover:#edeae2;
-  --bg-overlay:     rgba(24, 35, 59, 0.40);
+  /* ── Dark Theme Defaults (#0A0A0C) ────────────────────────── */
+  --bg:               #0A0A0C;
+  --bg-gradient:      none;
+  --bg-card:          #141416;
+  --bg-card-hover:    #19191C;
+  --bg-subtle:        #1C1C1F;
+  --bg-subtle-hover:  #242428;
+  --bg-overlay:       rgba(0, 0, 0, 0.75);
 
-  --border:         #eae6de;
-  --border-subtle:  #f3efe7;
-  --border-bright:  #ddd8cd;
+  --border:           #242427;
+  --border-subtle:    #1F1F22;
+  --border-bright:    #3A3A3E;
 
-  --text:           #18233B;
-  --text-muted:     #64748B;
-  --text-faint:     #94A3B8;
+  --text:             #EDEDED;
+  --text-muted:       #888888;
+  --text-faint:       #52525B;
 
-  --accent:         #4E8752;
-  --accent-hover:   #3D7041;
-  --accent-soft:    rgba(78, 135, 82, 0.12);
-  --accent-ring:    rgba(78, 135, 82, 0.25);
+  /* Accent: Violet / Purple */
+  --accent:           #8B5CF6;
+  --accent-hover:     #7C3AED;
+  --accent-soft:      rgba(139, 92, 246, 0.16);
+  --accent-ring:      rgba(139, 92, 246, 0.35);
+  --accent-glow:      0 0 16px rgba(139, 92, 246, 0.3);
 
-  --sidebar-bg:     #FAF9F6;
-  --sidebar-border: #EAE6DE;
-  --nav-active-bg:  #E8F5E9;
-  --nav-active-text:#2E6B34;
+  /* Primary Button (White Fill) */
+  --btn-primary-bg:   #FFFFFF;
+  --btn-primary-text: #0A0A0C;
+  --btn-primary-hover:#E5E5E5;
 
-  /* Pastel palette accents */
-  --pastel-green:        #7DBA91;
-  --pastel-green-soft:   #F0FAF4;
-  --pastel-peach:        #F5A27D;
-  --pastel-peach-soft:   #FFF5EC;
-  --pastel-lavender:     #B58AD9;
-  --pastel-lavender-soft:#F5F0FF;
-  --pastel-blue:         #78A9E8;
-  --pastel-blue-soft:    #EEF4FF;
-  --pastel-pink:         #F58B96;
-  --pastel-pink-soft:    #FCE4EC;
-  --pastel-yellow:       #F3C75B;
-  --pastel-yellow-soft:  #FFF9E6;
-  --pastel-mint:         #70C8B2;
-  --pastel-mint-soft:    #E0F2F1;
+  /* Secondary Button (Dark Fill with Border) */
+  --btn-secondary-bg:   #1C1C1F;
+  --btn-secondary-border:#333336;
+  --btn-secondary-text: #EDEDED;
+  --btn-secondary-hover:#26262B;
 
-  --danger:         #E53935;
-  --danger-soft:    rgba(229, 57, 53, 0.10);
-  --danger-hover:   #C62828;
+  /* Success & Checkbox */
+  --accent-done:      #3B82F6;
+  --accent-done-soft: rgba(59, 130, 246, 0.16);
 
-  /* Stat card backgrounds */
-  --stat-bg-0: #F0FAF4;
-  --stat-bg-1: #FFF5EC;
-  --stat-bg-2: #F5F0FF;
-  --stat-bg-3: #EEF4FF;
+  --danger:           #EF4444;
+  --danger-soft:      rgba(239, 68, 68, 0.16);
+  --danger-hover:     #DC2626;
 
-  /* Hero banner */
-  --hero-banner-bg: #EAF4FD;
-  --hero-banner-border: #D6E6F7;
+  /* GitHub-Style Blue Heatmap Color Scale (Dark) */
+  --cell-empty:        #1E1E22;
+  --cell-empty-border: #26262A;
+  --cell-blue-1:       #1D3557;
+  --cell-blue-2:       #1E40AF;
+  --cell-blue-3:       #2563EB;
+  --cell-blue-4:       #60A5FA;
 
-  /* Per-habit color palettes (light cell → mid cell → strong cell) */
-  --habit-0-bg:     #FCE4EC;
-  --habit-0-mid:    #F48FB1;
-  --habit-0-strong: #EC4899;
-  --habit-0-icon-bg:#FCE4EC;
+  /* Habit Slots */
+  --habit-0-bg:       rgba(239, 68, 68, 0.15);
+  --habit-0-strong:   #F87171;
+  --habit-1-bg:       rgba(59, 130, 246, 0.15);
+  --habit-1-strong:   #60A5FA;
+  --habit-2-bg:       rgba(16, 185, 129, 0.15);
+  --habit-2-strong:   #34D399;
+  --habit-3-bg:       rgba(139, 92, 246, 0.15);
+  --habit-3-strong:   #A78BFA;
+  --habit-4-bg:       rgba(245, 158, 11, 0.15);
+  --habit-4-strong:   #FBBF24;
+  --habit-5-bg:       rgba(236, 72, 153, 0.15);
+  --habit-5-strong:   #F472B6;
 
-  --habit-1-bg:     #E3F2FD;
-  --habit-1-mid:    #90CAF9;
-  --habit-1-strong: #3B82F6;
-  --habit-1-icon-bg:#E3F2FD;
+  /* Typography */
+  --font-heading: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif;
+  --font-sans: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif;
 
-  --habit-2-bg:     #E0F2F1;
-  --habit-2-mid:    #80CBC4;
-  --habit-2-strong: #14B8A6;
-  --habit-2-icon-bg:#E0F2F1;
-
-  --habit-3-bg:     #FFF9E6;
-  --habit-3-mid:    #FFE082;
-  --habit-3-strong: #F59E0B;
-  --habit-3-icon-bg:#FFF9E6;
-
-  --habit-4-bg:     #F3E5F5;
-  --habit-4-mid:    #CE93D8;
-  --habit-4-strong: #8B5CF6;
-  --habit-4-icon-bg:#F3E5F5;
-
-  --habit-5-bg:     #FBE9E7;
-  --habit-5-mid:    #FFAB91;
-  --habit-5-strong: #F97316;
-  --habit-5-icon-bg:#FBE9E7;
-
-  /* Heatmap cell visibility tokens (Light Mode) */
-  --cell-empty:        #EEF1F5;
-  --cell-empty-border: #CBD5E1;
-  --cell-empty-hover:  #D1D5DB;
-  --cell-future:       #F8FAFC;
-  --cell-future-border: #E2E8F0;
-
-  /* Dedicated mini-graph card container (Light Mode) */
-  --mini-graph-bg:     #F1F5F9;
-  --mini-graph-border: #E2E8F0;
-
-  /* Fonts */
-  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-
-  /* Shadows */
-  --shadow-soft:  0 2px 12px rgba(24, 35, 59, 0.04);
-  --shadow-hover: 0 4px 18px rgba(24, 35, 59, 0.08);
-  --shadow-card:  0 1px 4px  rgba(24, 35, 59, 0.03);
-  --shadow-sidebar: 1px 0 0 0 var(--sidebar-border);
-
-  /* Radii */
-  --radius-lg:   20px;
-  --radius-card: 16px;
-  --radius-sm:   10px;
+  /* Radii & Shadows */
+  --radius-lg:   16px;
+  --radius-card: 14px;
+  --radius-sm:   8px;
   --radius-pill: 9999px;
+
+  --shadow-soft: 0 8px 30px rgba(0, 0, 0, 0.5);
+  --shadow-card: 0 2px 10px rgba(0, 0, 0, 0.3);
 
   /* Spacing */
   --space-1: 4px;
@@ -121,100 +86,144 @@
   --space-6: 24px;
   --space-8: 32px;
 
-  color-scheme: light;
+  color-scheme: dark;
 }
 
-/* ── Dark Theme ───────────────────────────────────────────────── */
+/* ── Dark Theme via attribute (matches when useTheme sets data-theme="dark") ─ */
 [data-theme="dark"] {
-  --bg:             #161D2B;
-  --bg-card:        #212B3D;
-  --bg-card-hover:  #283448;
-  --bg-subtle:      #2A364B;
-  --bg-subtle-hover:#32415A;
-  --bg-overlay:     rgba(0, 0, 0, 0.65);
+  --bg:               #0A0A0C;
+  --bg-gradient:      none;
+  --bg-card:          #141416;
+  --bg-card-hover:    #19191C;
+  --bg-subtle:        #1C1C1F;
+  --bg-subtle-hover:  #242428;
+  --bg-overlay:       rgba(0, 0, 0, 0.75);
 
-  --border:         #2E3C54;
-  --border-subtle:  #263246;
-  --border-bright:  #3E506F;
+  --border:           #242427;
+  --border-subtle:    #1F1F22;
+  --border-bright:    #3A3A3E;
 
-  --text:           #F0F4F8;
-  --text-muted:     #94A3B8;
-  --text-faint:     #64748B;
+  --text:             #EDEDED;
+  --text-muted:       #888888;
+  --text-faint:       #52525B;
 
-  --accent:         #5E9663;
-  --accent-hover:   #70C880;
-  --accent-soft:    rgba(94, 150, 99, 0.20);
-  --accent-ring:    rgba(94, 150, 99, 0.35);
+  --accent:           #8B5CF6;
+  --accent-hover:     #7C3AED;
+  --accent-soft:      rgba(139, 92, 246, 0.16);
+  --accent-ring:      rgba(139, 92, 246, 0.35);
+  --accent-glow:      0 0 16px rgba(139, 92, 246, 0.3);
 
-  --sidebar-bg:     #161D2B;
-  --sidebar-border: #253145;
-  --nav-active-bg:  rgba(94, 150, 99, 0.22);
-  --nav-active-text:#70C880;
+  --btn-primary-bg:   #FFFFFF;
+  --btn-primary-text: #0A0A0C;
+  --btn-primary-hover:#E5E5E5;
 
-  --pastel-green:        #5E9663;
-  --pastel-green-soft:   #1C2D24;
-  --pastel-peach:        #D87D59;
-  --pastel-peach-soft:   #2D231E;
-  --pastel-lavender:     #9A6BBF;
-  --pastel-lavender-soft:#292036;
-  --pastel-blue:         #5789C7;
-  --pastel-blue-soft:    #1D2638;
+  --btn-secondary-bg:   #1C1C1F;
+  --btn-secondary-border:#333336;
+  --btn-secondary-text: #EDEDED;
+  --btn-secondary-hover:#26262B;
 
-  --danger:         #EF5350;
-  --danger-soft:    rgba(239, 83, 80, 0.15);
-  --danger-hover:   #E53935;
+  --accent-done:      #3B82F6;
+  --accent-done-soft: rgba(59, 130, 246, 0.16);
 
-  --stat-bg-0: #1B2922;
-  --stat-bg-1: #2B221B;
-  --stat-bg-2: #251D30;
-  --stat-bg-3: #1B2433;
+  --danger:           #EF4444;
+  --danger-soft:      rgba(239, 68, 68, 0.16);
+  --danger-hover:     #DC2626;
 
-  --hero-banner-bg:     #1B273A;
-  --hero-banner-border: #2B3D5A;
+  --cell-empty:        #1E1E22;
+  --cell-empty-border: #26262A;
+  --cell-blue-1:       #1D3557;
+  --cell-blue-2:       #1E40AF;
+  --cell-blue-3:       #2563EB;
+  --cell-blue-4:       #60A5FA;
 
-  --habit-0-bg:     rgba(233, 30, 99, 0.18);
-  --habit-0-mid:    rgba(233, 30, 99, 0.50);
-  --habit-0-strong: #EC407A;
-  --habit-0-icon-bg:rgba(233, 30, 99, 0.22);
+  --habit-0-bg:       rgba(239, 68, 68, 0.15);
+  --habit-0-strong:   #F87171;
+  --habit-1-bg:       rgba(59, 130, 246, 0.15);
+  --habit-1-strong:   #60A5FA;
+  --habit-2-bg:       rgba(16, 185, 129, 0.15);
+  --habit-2-strong:   #34D399;
+  --habit-3-bg:       rgba(139, 92, 246, 0.15);
+  --habit-3-strong:   #A78BFA;
+  --habit-4-bg:       rgba(245, 158, 11, 0.15);
+  --habit-4-strong:   #FBBF24;
+  --habit-5-bg:       rgba(236, 72, 153, 0.15);
+  --habit-5-strong:   #F472B6;
 
-  --habit-1-bg:     rgba(30, 136, 229, 0.18);
-  --habit-1-mid:    rgba(30, 136, 229, 0.50);
-  --habit-1-strong: #42A5F5;
-  --habit-1-icon-bg:rgba(30, 136, 229, 0.22);
-
-  --habit-2-bg:     rgba(0, 137, 123, 0.18);
-  --habit-2-mid:    rgba(0, 137, 123, 0.50);
-  --habit-2-strong: #26A69A;
-  --habit-2-icon-bg:rgba(0, 137, 123, 0.22);
-
-  --habit-3-bg:     rgba(245, 127, 23, 0.18);
-  --habit-3-mid:    rgba(245, 127, 23, 0.50);
-  --habit-3-strong: #FFCA28;
-  --habit-3-icon-bg:rgba(245, 127, 23, 0.22);
-
-  --habit-4-bg:     rgba(142, 36, 170, 0.18);
-  --habit-4-mid:    rgba(142, 36, 170, 0.50);
-  --habit-4-strong: #AB47BC;
-  --habit-4-icon-bg:rgba(142, 36, 170, 0.22);
-
-  --habit-5-bg:     rgba(244, 81, 30, 0.18);
-  --habit-5-mid:    rgba(244, 81, 30, 0.50);
-  --habit-5-strong: #FF7043;
-  --habit-5-icon-bg:rgba(244, 81, 30, 0.22);
-
-  --cell-empty:        #2A354A;
-  --cell-empty-border: #3B4B68;
-  --cell-empty-hover:  #384762;
-  --cell-future:       #151D2A;
-  --cell-future-border: #242F42;
-
-  --mini-graph-bg:     #1A2332;
-  --mini-graph-border: #2D3A50;
-
-  --shadow-soft:   0 2px 12px rgba(0, 0, 0, 0.30);
-  --shadow-hover:  0 4px 18px rgba(0, 0, 0, 0.45);
-  --shadow-card:   0 1px 4px  rgba(0, 0, 0, 0.25);
-  --shadow-sidebar:1px 0 0 0 var(--sidebar-border);
+  --shadow-soft: 0 8px 30px rgba(0, 0, 0, 0.5);
+  --shadow-card: 0 2px 10px rgba(0, 0, 0, 0.3);
 
   color-scheme: dark;
+}
+
+
+/* ── Light Mode Counterpart (#F4F4F6) ───────────────────────── */
+[data-theme="light"] {
+  --bg:               #F4F4F6;
+  --bg-gradient:      none;
+  --bg-card:          #FFFFFF;
+  --bg-card-hover:    #FAF9FC;
+  --bg-subtle:        #EBECEF;
+  --bg-subtle-hover:  #E2E4E8;
+  --bg-overlay:       rgba(0, 0, 0, 0.35);
+
+  --border:           #E4E4E7;
+  --border-subtle:    #F0F0F3;
+  --border-bright:    #D4D4D8;
+
+  --text:             #09090B;
+  --text-muted:       #71717A;
+  --text-faint:       #A1A1AA;
+
+  /* Accent: Violet / Purple */
+  --accent:           #7C3AED;
+  --accent-hover:     #6D28D9;
+  --accent-soft:      rgba(124, 58, 237, 0.1);
+  --accent-ring:      rgba(124, 58, 237, 0.25);
+  --accent-glow:      0 0 16px rgba(124, 58, 237, 0.2);
+
+  /* Primary Button (Dark Fill) */
+  --btn-primary-bg:   #09090B;
+  --btn-primary-text: #FFFFFF;
+  --btn-primary-hover:#27272A;
+
+  /* Secondary Button (Light Fill with Border) */
+  --btn-secondary-bg:   #EBECEF;
+  --btn-secondary-border:#D4D4D8;
+  --btn-secondary-text: #09090B;
+  --btn-secondary-hover:#E2E4E8;
+
+  /* Success & Checkbox */
+  --accent-done:      #2563EB;
+  --accent-done-soft: rgba(37, 99, 235, 0.1);
+
+  --danger:           #DC2626;
+  --danger-soft:      rgba(220, 38, 38, 0.1);
+  --danger-hover:     #B91C1C;
+
+  /* GitHub-Style Blue Heatmap Color Scale (Light) */
+  --cell-empty:        #EBEDF0;
+  --cell-empty-border: #E1E4E8;
+  --cell-blue-1:       #DBEAFE;
+  --cell-blue-2:       #93C5FD;
+  --cell-blue-3:       #3B82F6;
+  --cell-blue-4:       #1D4ED8;
+
+  /* Habit Slots (Light) */
+  --habit-0-bg:       rgba(239, 68, 68, 0.1);
+  --habit-0-strong:   #EF4444;
+  --habit-1-bg:       rgba(59, 130, 246, 0.1);
+  --habit-1-strong:   #3B82F6;
+  --habit-2-bg:       rgba(16, 185, 129, 0.1);
+  --habit-2-strong:   #10B981;
+  --habit-3-bg:       rgba(139, 92, 246, 0.1);
+  --habit-3-strong:   #8B5CF6;
+  --habit-4-bg:       rgba(245, 158, 11, 0.1);
+  --habit-4-strong:   #F59E0B;
+  --habit-5-bg:       rgba(236, 72, 153, 0.1);
+  --habit-5-strong:   #EC4899;
+
+  --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.06);
+  --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.04);
+
+  color-scheme: light;
 }

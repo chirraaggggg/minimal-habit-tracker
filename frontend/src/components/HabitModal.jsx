@@ -5,22 +5,33 @@ import {
   IllustrationCoding,
   IllustrationWater,
   IllustrationMeditation,
-  IllustrationSleep,
+  IllustrationNoSocialMedia,
   IconClose,
 } from './Illustrations';
 
 const CATEGORY_OPTIONS = [
-  { id: 'exercise', name: 'Exercise', icon: <IllustrationExercise /> },
-  { id: 'reading', name: 'Reading', icon: <IllustrationReading /> },
-  { id: 'coding', name: 'Coding', icon: <IllustrationCoding /> },
+  { id: 'exercise', name: 'Gym', icon: <IllustrationExercise /> },
+  { id: 'reading', name: 'Read', icon: <IllustrationReading /> },
+  { id: 'coding', name: 'Code', icon: <IllustrationCoding /> },
   { id: 'water', name: 'Water', icon: <IllustrationWater /> },
-  { id: 'meditation', name: 'Meditation', icon: <IllustrationMeditation /> },
-  { id: 'sleep', name: 'Sleep', icon: <IllustrationSleep /> },
+  { id: 'meditation', name: 'Meditate', icon: <IllustrationMeditation /> },
+  { id: 'nosocial', name: 'Focus', icon: <IllustrationNoSocialMedia /> },
 ];
+
+function resolveInitialCategory(emoji) {
+  if (!emoji) return 'exercise';
+  const key = String(emoji).toLowerCase();
+  if (key.includes('gym') || key.includes('exercise') || key.includes('workout')) return 'exercise';
+  if (key.includes('read') || key.includes('book') || key.includes('study')) return 'reading';
+  if (key.includes('code') || key.includes('coding') || key.includes('dev')) return 'coding';
+  if (key.includes('water') || key.includes('drink') || key.includes('hydrat')) return 'water';
+  if (key.includes('meditat') || key.includes('mindful') || key.includes('peace')) return 'meditation';
+  return 'nosocial';
+}
 
 export default function HabitModal({ initial, onSubmit, onCancel }) {
   const [name, setName] = useState(initial?.name || '');
-  const [category, setCategory] = useState(initial?.emoji || 'exercise');
+  const [category, setCategory] = useState(resolveInitialCategory(initial?.emoji));
   const [loading, setLoading] = useState(false);
   const [submitError, setSubmitError] = useState(null);
 
@@ -30,7 +41,6 @@ export default function HabitModal({ initial, onSubmit, onCancel }) {
     setLoading(true);
     setSubmitError(null);
     try {
-      // Pass category string as second parameter (preserves backend emoji string column without requiring DB migration)
       await onSubmit(name.trim(), category);
     } catch (err) {
       setSubmitError(err.message || 'Something went wrong. Please try again.');
@@ -41,9 +51,15 @@ export default function HabitModal({ initial, onSubmit, onCancel }) {
 
   return (
     <div className="modal-backdrop" onClick={onCancel}>
-      <form className="cute-modal" onClick={(e) => e.stopPropagation()} onSubmit={handleSubmit}>
+      <form
+        className="cute-modal animate-fade"
+        onClick={(e) => e.stopPropagation()}
+        onSubmit={handleSubmit}
+      >
         <div className="modal-top">
-          <h2 className="modal-title">{initial ? 'Edit Habit' : 'New Habit'}</h2>
+          <h2 className="modal-title">
+            {initial ? '✏️ Edit Habit' : '✨ New Habit'}
+          </h2>
           <button type="button" className="modal-close-btn" onClick={onCancel} aria-label="Close">
             <IconClose />
           </button>
@@ -60,14 +76,15 @@ export default function HabitModal({ initial, onSubmit, onCancel }) {
               placeholder="e.g. Daily Reading"
               autoFocus
               required
+              maxLength={60}
             />
           </label>
 
           <div className="input-group">
-            <span className="input-label">Choose an Illustration</span>
+            <span className="input-label">Choose Icon</span>
             <div className="category-selection-grid">
               {CATEGORY_OPTIONS.map((cat) => {
-                const isSelected = category.toLowerCase() === cat.id;
+                const isSelected = category === cat.id;
                 return (
                   <button
                     key={cat.id}
@@ -100,7 +117,7 @@ export default function HabitModal({ initial, onSubmit, onCancel }) {
             className="btn-accent-pill"
             disabled={loading || !name.trim()}
           >
-            {loading ? 'Saving...' : initial ? 'Save Changes' : 'Create Habit'}
+            {loading ? 'Saving...' : initial ? 'Save Changes' : 'Create Habit 🔥'}
           </button>
         </div>
       </form>

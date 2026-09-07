@@ -1,19 +1,19 @@
-import { IllustrationLogo, IconPlus } from './Illustrations';
+import { BunnyLogo, IconPlus } from './Illustrations';
 
 export default function Navbar({ onOpenAddModal, onSignOut }) {
   return (
     <nav className="navbar-container">
       <div className="navbar-brand">
         <div className="navbar-logo-frame">
-          <IllustrationLogo />
+          <BunnyLogo size={28} />
         </div>
-        <span className="navbar-title">Habit Tracker</span>
+        <span className="navbar-title">Cozy Sanctuary</span>
       </div>
 
       <div className="navbar-actions">
         <button
           type="button"
-          className="btn-accent-pill"
+          className="btn-pill-coral"
           onClick={onOpenAddModal}
           aria-label="Add new habit"
         >

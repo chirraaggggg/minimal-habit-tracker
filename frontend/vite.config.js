@@ -6,7 +6,8 @@ export default defineConfig({
   plugins: [react()],
   server: {
     proxy: {
-      '/api': process.env.VITE_API_URL || 'http://localhost:3000',
+      // eslint-disable-next-line no-undef
+      '/api': (typeof process !== 'undefined' && process.env?.VITE_API_URL) || 'http://localhost:3000',
     },
   },
 })

@@ -1,50 +1,83 @@
-import { StageSeed, StageSprout, StagePlant, StageFlower } from './Illustrations';
+import { useEffect, useRef, useState } from 'react';
+import { PixelNatureScene, IconPlus } from './Illustrations';
 
-export default function HeroSection({ totalCompletions = 0 }) {
-  // Determine current active growth stage
-  let activeStage = 0;
-  if (totalCompletions >= 30) activeStage = 3;
-  else if (totalCompletions >= 10) activeStage = 2;
-  else if (totalCompletions >= 1) activeStage = 1;
+export default function HeroSection({ onAddHabit, onExploreClick }) {
+  const heroRef = useRef(null);
+  const [scrolledPast, setScrolledPast] = useState(false);
+  const [scrollY, setScrollY] = useState(0);
 
-  const stages = [
-    { name: 'Seed', icon: <StageSeed />, min: 0 },
-    { name: 'Sprout', icon: <StageSprout />, min: 1 },
-    { name: 'Growing', icon: <StagePlant />, min: 10 },
-    { name: 'Bloom', icon: <StageFlower />, min: 30 },
-  ];
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentY = window.scrollY;
+      setScrollY(currentY);
+      if (currentY > 120) {
+        setScrolledPast(true);
+      } else {
+        setScrolledPast(false);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Parallax offset computation
+  const parallaxOffset = Math.min(scrollY * 0.2, 60);
+  const heroOpacity = Math.max(1 - scrollY / 320, 0);
 
   return (
-    <section className="hero-card-container">
-      <div className="hero-text-group">
-        <span className="hero-tag">DAILY PROGRESSION</span>
-        <h1 className="hero-title">Build better habits, one day at a time.</h1>
-        <p className="hero-subtitle">
-          Stay consistent and watch your little garden grow with every completed day.
-        </p>
+    <section
+      ref={heroRef}
+      className={`hero-section-sanctuary ${scrolledPast ? 'scrolled-recede' : ''}`}
+      style={{ opacity: heroOpacity }}
+    >
+      {/* Background Pixel Nature Scene with Parallax */}
+      <div
+        className="hero-landscape-viewport"
+        style={{ transform: `translateY(${parallaxOffset}px)` }}
+      >
+        <PixelNatureScene />
       </div>
 
-      <div className="hero-progression-card">
-        <div className="progression-stages-row">
-          {stages.map((stage, idx) => {
-            const isActive = idx === activeStage;
-            const isUnlocked = idx <= activeStage;
+      {/* Floating Hero Content Overlay */}
+      <div className="hero-content-box">
+        <div className="hero-badge-pill">
+          <span className="hero-badge-dot" />
+          <span>QUIET DIGITAL SANCTUARY</span>
+        </div>
 
-            return (
-              <div
-                key={stage.name}
-                className={`progression-stage-item ${isActive ? 'active' : ''} ${
-                  isUnlocked ? 'unlocked' : 'locked'
-                }`}
-              >
-                <div className="stage-icon-frame">
-                  {stage.icon}
-                  {isActive && <span className="stage-active-dot" />}
-                </div>
-                <span className="stage-label">{stage.name}</span>
-              </div>
-            );
-          })}
+        <h1 className="hero-main-title">
+          Cultivate stillness,<br />
+          <span className="hero-title-accent">one habit at a time.</span>
+        </h1>
+
+        <p className="hero-description">
+          A cozy, minimal space for mindful daily consistency. Check off your goals, feel the warmth of momentum, and watch your daily retreat flourish.
+        </p>
+
+        <div className="hero-actions-row">
+          <button
+            type="button"
+            className="btn-pill-coral"
+            onClick={onAddHabit}
+          >
+            <IconPlus />
+            <span>Plant a Habit</span>
+          </button>
+
+          <button
+            type="button"
+            className="btn-pill-secondary"
+            onClick={() => {
+              if (onExploreClick) {
+                onExploreClick();
+              } else {
+                window.scrollTo({ top: 380, behavior: 'smooth' });
+              }
+            }}
+          >
+            <span>Scroll to Sanctuary</span>
+          </button>
         </div>
       </div>
     </section>

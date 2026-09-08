@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { supabase } from '../supabase';
+import { CalendarLogo } from './Illustrations';
 
 // ---------------------------------------------------------------------------
 // Google Logo Icon
@@ -177,8 +178,8 @@ export default function AuthScreen() {
       <div className="auth-card animate-fade">
         {/* Brand */}
         <div className="auth-brand">
-          <div className="auth-logo-frame" aria-hidden="true">🔥</div>
-          <span className="auth-brand-name">StreakEngine</span>
+          <CalendarLogo size={42} />
+          <span className="auth-brand-name">Habito</span>
         </div>
 
         {/* Heading */}

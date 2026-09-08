@@ -246,6 +246,19 @@
   flex-shrink: 0;
 }
 
+.top-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.top-brand-name {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: -0.02em;
+}
+
 .top-bar-center {
   display: flex;
   align-items: center;

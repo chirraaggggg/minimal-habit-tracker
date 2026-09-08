@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { IconPlus, IconSun, IconMoon } from './Illustrations';
+import { IconPlus, IconSun, IconMoon, CalendarLogo } from './Illustrations';
 
 export default function Header({
   activeTab = 'calendar',
@@ -17,7 +17,12 @@ export default function Header({
   return (
     <header className="top-navigation-bar">
       <div className="top-bar-container">
-        <div className="top-bar-left" />
+        <div className="top-bar-left">
+          <div className="top-brand">
+            <CalendarLogo size={40} />
+            <span className="top-brand-name">Habito</span>
+          </div>
+        </div>
 
         {/* Center: Pill-Shaped Tab Group (Calendar / Statistics / Manage) */}
         <div className="top-bar-center">

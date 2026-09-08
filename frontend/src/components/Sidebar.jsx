@@ -1,4 +1,4 @@
-import { BunnyLogo, IconHome, IconHabits, IconStats, IconCalendar, IconSettings } from './Illustrations';
+import { CalendarLogo, IconHome, IconHabits, IconStats, IconCalendar, IconSettings } from './Illustrations';
 
 const NAV_ITEMS = [
   { id: 'home',     label: 'Home',     Icon: IconHome },
@@ -14,11 +14,10 @@ export default function Sidebar({ activeNav = 'home', onNavChange }) {
       {/* Brand */}
       <div className="sidebar-brand">
         <div className="sidebar-logo-wrap" aria-hidden="true">
-          <BunnyLogo size={36} />
+          <CalendarLogo size={36} />
         </div>
         <div className="sidebar-brand-text">
-          <span className="sidebar-app-name">Cozy</span>
-          <span className="sidebar-app-sub">Sanctuary</span>
+          <span className="sidebar-app-name">Habito</span>
         </div>
       </div>
 

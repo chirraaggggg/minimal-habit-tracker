@@ -6,17 +6,88 @@
 /* ─────────────────────────────────────────────────────────────────────────────
    BRAND — Pixel Tree Logo (sidebar / top header)
 ───────────────────────────────────────────────────────────────────────────── */
-export function BunnyLogo({ size = 38 }) {
+export function CalendarLogo({ size = 38 }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <rect width="32" height="32" rx="8" fill="var(--accent-soft)" />
-      {/* Pixel Pine Tree */}
-      <rect x="14" y="22" width="4" height="6" fill="#4A3425" />
-      <polygon points="16,4 7,14 25,14" fill="var(--accent-done)" />
-      <polygon points="16,9 9,18 23,18" fill="#3B6547" />
-      <polygon points="16,13 11,22 21,22" fill="#2D5037" />
-      {/* Coral star/flower */}
-      <rect x="15" y="2" width="2" height="2" fill="var(--accent)" />
+    <svg width={size} height={size} viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      {/* Shadow for depth - stronger for visibility */}
+      <defs>
+        <filter id="logoShadow" x="-20%" y="-20%" width="150%" height="150%">
+          <feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="rgba(0,0,0,0.25)" />
+        </filter>
+      </defs>
+      {/* Background with stronger shadow */}
+      <rect width="64" height="64" rx="14" fill="#FFFFFF" filter="url(#logoShadow)" />
+      {/* Accent border for visibility */}
+      <rect x="1" y="1" width="62" height="62" rx="13" fill="none" stroke="#76bc7e" strokeWidth="1.5" opacity="0.5" />
+      
+      {/* Plant sprout - stem */}
+      <path d="M32 8 C32 8 30 14 30 18" stroke="#54a86b" strokeWidth="2.5" strokeLinecap="round" />
+      <path d="M34 8 C34 8 36 14 36 18" stroke="#54a86b" strokeWidth="2.5" strokeLinecap="round" />
+      
+      {/* Left leaf */}
+      <path d="M30 18 C26 14 22 16 22 20 C22 24 26 22 30 18Z" fill="#9be089" />
+      <path d="M30 18 C26 14 22 16 22 20" stroke="#2b1a13" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+      
+      {/* Right leaf */}
+      <path d="M34 18 C38 14 42 16 42 20 C42 24 38 22 34 18Z" fill="#9be089" />
+      <path d="M34 18 C38 14 42 16 42 20" stroke="#2b1a13" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+      
+      {/* Action lines / sparkles - upper left */}
+      <ellipse cx="16" cy="14" rx="4" ry="2" fill="#ffdb75" transform="rotate(-30 16 14)" />
+      <ellipse cx="12" cy="20" rx="3" ry="1.5" fill="#ffdb75" transform="rotate(-30 12 20)" />
+      
+      {/* Action lines / sparkles - upper right */}
+      <ellipse cx="48" cy="14" rx="4" ry="2" fill="#ffdb75" transform="rotate(30 48 14)" />
+      <ellipse cx="52" cy="20" rx="3" ry="1.5" fill="#ffdb75" transform="rotate(30 52 20)" />
+      
+      {/* Calendar body - cleaner look */}
+      <rect x="12" y="22" width="40" height="34" rx="6" fill="#fcfaf5" />
+      {/* Subtle inner shadow for calendar */}
+      <rect x="13" y="23" width="38" height="15" rx="4" fill="rgba(0,0,0,0.03)" />
+      
+      {/* Calendar top bar */}
+      <rect x="12" y="22" width="40" height="10" rx="4" fill="#76bc7e" />
+      <rect x="12" y="28" width="40" height="4" fill="#76bc7e" />
+      
+      {/* Binder rings */}
+      <ellipse cx="22" cy="22" rx="3" ry="4" fill="none" stroke="#f2efe9" strokeWidth="2.5" />
+      <ellipse cx="42" cy="22" rx="3" ry="4" fill="none" stroke="#f2efe9" strokeWidth="2.5" />
+      
+      {/* Face - happy eyes */}
+      <path d="M24 34 Q26 31 28 34" stroke="#2b1a13" strokeWidth="2" strokeLinecap="round" fill="none" />
+      <path d="M36 34 Q38 31 40 34" stroke="#2b1a13" strokeWidth="2" strokeLinecap="round" fill="none" />
+      
+      {/* Blush */}
+      <circle cx="22" cy="37" r="2.5" fill="#f9a081" opacity="0.6" />
+      <circle cx="42" cy="37" r="2.5" fill="#f9a081" opacity="0.6" />
+      
+      {/* Smile */}
+      <path d="M28 39 Q32 43 36 39" stroke="#2b1a13" strokeWidth="1.5" strokeLinecap="round" fill="none" />
+      <path d="M30 39 Q32 41 34 39" fill="#f9a081" />
+      
+      {/* Calendar grid - row 1 */}
+      <rect x="17" y="42" width="6" height="6" rx="1" fill="#85c490" />
+      <path d="M19 45 L20 44 L22 42" stroke="white" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+      
+      <rect x="26" y="42" width="6" height="6" rx="1" fill="#e2e8df" />
+      
+      <rect x="35" y="42" width="6" height="6" rx="1" fill="#85c490" />
+      <path d="M37 45 L38 44 L40 42" stroke="white" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+      
+      <rect x="44" y="42" width="6" height="6" rx="1" fill="#e2e8df" />
+      
+      {/* Calendar grid - row 2 */}
+      <rect x="17" y="50" width="6" height="5" rx="1" fill="#e2e8df" />
+      <rect x="26" y="50" width="6" height="5" rx="1" fill="#e2e8df" />
+      <rect x="35" y="50" width="6" height="5" rx="1" fill="#e2e8df" />
+      <rect x="44" y="50" width="6" height="5" rx="1" fill="#e2e8df" />
+      
+      {/* Badge/checkmark circle */}
+      <circle cx="48" cy="50" r="8" fill="#76bc7e" />
+      <path d="M45 50 L47 52 L51 47" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      
+      {/* Small hand holding badge */}
+      <circle cx="44" cy="49" r="2.5" fill="#4A3425" />
     </svg>
   );
 }

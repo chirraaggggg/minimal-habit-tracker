@@ -1,13 +1,13 @@
-import { BunnyLogo, IconPlus } from './Illustrations';
+import { CalendarLogo, IconPlus } from './Illustrations';
 
 export default function Navbar({ onOpenAddModal, onSignOut }) {
   return (
     <nav className="navbar-container">
       <div className="navbar-brand">
         <div className="navbar-logo-frame">
-          <BunnyLogo size={28} />
+          <CalendarLogo size={28} />
         </div>
-        <span className="navbar-title">Cozy Sanctuary</span>
+        <span className="navbar-title">Habito</span>
       </div>
 
       <div className="navbar-actions">
